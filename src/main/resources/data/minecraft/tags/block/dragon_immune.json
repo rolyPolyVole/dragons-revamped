@@ -2,6 +2,13 @@
     "replace": false,
     "values": [
         "minecraft:deepslate_tile_stairs",
-        "minecraft:deepslate_tile_slab"
+        "minecraft:deepslate_tile_slab",
+        "minecraft:iron_block",
+        "minecraft:gold_block",
+        "minecraft:emerald_block",
+        "minecraft:diamond_block",
+        "minecraft:netherite_block",
+        "minecraft:beacon",
+        "minecraft:jukebox"
     ]
 }

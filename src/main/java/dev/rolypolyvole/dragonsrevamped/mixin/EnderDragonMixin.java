@@ -117,7 +117,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Unique
     private boolean shouldTickAttacks() {
-        return attackManager != null && abilityManager.getRageAbility().isActive() && getHealth() > 1.0F && finishedCooldown();
+        return attackManager != null && !abilityManager.getRageAbility().isActive() && getHealth() > 1.0F && finishedCooldown();
     }
 
     @Unique

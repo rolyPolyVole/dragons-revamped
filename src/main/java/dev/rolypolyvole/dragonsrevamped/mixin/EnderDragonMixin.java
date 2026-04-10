@@ -29,6 +29,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
@@ -46,6 +47,8 @@ import java.util.List;
 @SuppressWarnings({"DataFlowIssue", "DiscouragedShift", "NameDoesntMatchTargetClass"})
 public abstract class EnderDragonMixin extends Mob implements Enemy {
 
+    @Shadow
+    private EndDragonFight dragonFight;
     @Final @Shadow
     private EnderDragonPhaseManager phaseManager;
 
@@ -100,6 +103,22 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Unique
+    private boolean finishedCooldown() {
+        boolean firstGeneration = dragonFight.saveData().needsStateScanning();
+        return !firstGeneration || tickCount > 15 * 20;
+    }
+
+    @Unique
+    private boolean shouldTickAbilities() {
+        return abilityManager != null && getHealth() > 1.0F && finishedCooldown();
+    }
+
+    @Unique
+    private boolean shouldTickAttacks() {
+        return attackManager != null && abilityManager.getRageAbility().isActive() && getHealth() > 1.0F && finishedCooldown();
+    }
+
+    @Unique
     private long nearbyPlayerCount() {
         Vec3 center = self().getFightOrigin().getCenter();
         return level().players().stream()
@@ -123,18 +142,18 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             phaseManager.setPhase(EnderDragonPhase.HOLDING_PATTERN);
         }
 
-        if (abilityManager != null) abilityManager.tick();
-        if (attackManager != null && !abilityManager.getRageAbility().isActive()) attackManager.tick();
+        if (shouldTickAbilities()) abilityManager.tick();
+        if (shouldTickAttacks()) attackManager.tick();
     }
 
     @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.BEFORE))
     private void beforeMove(CallbackInfo info) {
-        if (abilityManager != null && abilityManager.getRageAbility().isActive()) {
+        if (shouldTickAbilities() && abilityManager.getRageAbility().isActive()) {
             abilityManager.getRageAbility().onBeforeMove();
             return;
         }
 
-        if (attackManager != null && getHealth() > 1.0F) attackManager.onBeforeMove();
+        if (shouldTickAttacks()) attackManager.onBeforeMove();
     }
 
     @Unique

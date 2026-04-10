@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SpikeFeature.class)
+@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class EndSpikeMixin extends Feature<SpikeConfiguration> {
 
     public EndSpikeMixin(Codec<SpikeConfiguration> codec) {

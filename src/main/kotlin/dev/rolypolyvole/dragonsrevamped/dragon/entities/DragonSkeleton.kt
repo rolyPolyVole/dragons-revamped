@@ -77,6 +77,7 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F))
     }
 
+    @Suppress("SameParameterValue")
     private fun computeExactVelocity(dx: Double, dy: Double, dz: Double, maxSpeed: Double): Vec3 {
         val drag = 0.99
         val gravity = 0.05

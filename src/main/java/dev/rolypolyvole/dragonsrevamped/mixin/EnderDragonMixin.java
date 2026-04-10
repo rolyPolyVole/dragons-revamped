@@ -43,12 +43,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(EnderDragon.class)
+@SuppressWarnings({"DataFlowIssue", "DiscouragedShift", "NameDoesntMatchTargetClass"})
 public abstract class EnderDragonMixin extends Mob implements Enemy {
+
     @Final @Shadow
     private EnderDragonPhaseManager phaseManager;
-
-    @Shadow
-    protected abstract void reallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f);
 
     @Final @Shadow
     private EnderDragonPart body;
@@ -59,6 +58,9 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Shadow
     public int dragonDeathTime;
+
+    @Shadow
+    protected abstract void reallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f);
 
     @Unique
     private EnderDragonPart hitPart;

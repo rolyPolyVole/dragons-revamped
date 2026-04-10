@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(EndCrystal.class)
+@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class EndCrystalMixin {
 
     @Unique

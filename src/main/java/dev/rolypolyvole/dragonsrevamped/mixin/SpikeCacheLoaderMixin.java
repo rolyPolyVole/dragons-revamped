@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(targets = "net.minecraft.world.level.levelgen.feature.SpikeFeature$SpikeCacheLoader")
+@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class SpikeCacheLoaderMixin {
 
     @Unique

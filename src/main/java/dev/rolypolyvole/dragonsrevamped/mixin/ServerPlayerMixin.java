@@ -18,7 +18,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
+@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class ServerPlayerMixin extends Player {
+
     public ServerPlayerMixin(Level level, GameProfile gameProfile) {
         super(level, gameProfile);
     }
@@ -34,7 +36,7 @@ public abstract class ServerPlayerMixin extends Player {
         this.deathSource = damageSource;
     }
 
-    @ModifyVariable(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
+    @ModifyVariable(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At(value = "STORE", ordinal = 0), name = "component")
     private Component customDeathMessage(Component value) {
         if (deathSource == null || deathSource.getDirectEntity() == null) {
             return value;

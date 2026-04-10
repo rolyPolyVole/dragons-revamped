@@ -14,10 +14,6 @@ fun BlockPos.highestBlockY(world: ServerLevel): BlockPos {
     return BlockPos(this.x, y, this.z)
 }
 
-fun BlockPos.toVec3(): Vec3 {
-    return Vec3(x.toDouble(), y.toDouble(), z.toDouble())
-}
-
 fun Vec3.xz(): Vec3 {
     return Vec3(x, 0.0, z)
 }

@@ -96,20 +96,17 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         val sentryPattern = trimPatterns.get(TrimPatterns.SENTRY).orElse(null) ?: return
         val flowPattern = trimPatterns.get(TrimPatterns.FLOW).orElse(null) ?: return
         val protection = enchantments.getOrThrow(Enchantments.PROTECTION)
-        val thorns = enchantments.getOrThrow(Enchantments.THORNS)
         val knockback = enchantments.getOrThrow(Enchantments.KNOCKBACK)
         val unbreaking = enchantments.getOrThrow(Enchantments.UNBREAKING)
 
         val chestplate = ItemStack(Items.NETHERITE_CHESTPLATE).apply {
             set(DataComponents.TRIM, ArmorTrim(amethyst, sentryPattern))
             enchant(protection, 4)
-            enchant(thorns, 3)
         }
 
         val helmet = ItemStack(Items.NETHERITE_HELMET).apply {
             set(DataComponents.TRIM, ArmorTrim(amethyst, flowPattern))
             enchant(protection, 4)
-            enchant(thorns, 3)
         }
 
         setItemSlot(EquipmentSlot.HEAD, helmet)

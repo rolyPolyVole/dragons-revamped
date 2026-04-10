@@ -86,6 +86,7 @@ class DragonRageAbility(
     private fun checkTrigger() {
         if (this.firstTick) {
             this.firstTick = false
+            cleanUpBlockDisplays()
 
             if (this.dragon.health <= this.dragon.maxHealth * 0.5f) {
                 this.hasPerformed = true
@@ -278,12 +279,24 @@ class DragonRageAbility(
             )
 
             val display = Display.BlockDisplay(EntityType.BLOCK_DISPLAY, this.level)
+            display.addTag(RAGE_BLOCK_TAG)
             display.blockState = state
             display.setPos(startPos.x, startPos.y, startPos.z)
 
             this.level.addFreshEntity(display)
             this.floatingBlocks.add(FloatingBlock(display, state, startPos))
         }
+    }
+
+    private fun cleanUpBlockDisplays() {
+        val area = AABB.ofSize(this.center, 200.0, 200.0, 200.0)
+        this.level.getEntitiesOfClass(Display.BlockDisplay::class.java, area)
+            .filter { RAGE_BLOCK_TAG in it.tags }
+            .forEach { it.discard() }
+    }
+
+    companion object {
+        private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
     }
 
     private fun respawnAllCrystals() {

@@ -29,7 +29,7 @@ loom {
     }
 
     mods {
-        register("dragon-revamped") {
+        register("dragons-revamped") {
             sourceSet("main")
             sourceSet("client")
         }

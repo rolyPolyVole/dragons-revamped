@@ -1,22 +1,22 @@
 {
     "schemaVersion": 1,
-    "id": "dragon-revamped",
+    "id": "dragons-revamped",
     "version": "${version}",
-    "name": "Dragon Revamped",
+    "name": "Dragons Revamped",
     "description": "",
     "authors": [],
     "contact": {},
     "license": "All-Rights-Reserved",
-    "icon": "assets/dragon_revamped/icon.png",
+    "icon": "assets/dragons_revamped/icon.png",
     "environment": "server",
     "entrypoints": {
         "server": [
-            "dev.rolypolyvole.dragonrevamped.DragonRevamped"
+            "dev.rolypolyvole.dragonsrevamped.DragonsRevamped"
         ]
     },
     "mixins": [
         {
-            "config": "dragon-revamped.mixins.json",
+            "config": "dragons-revamped.mixins.json",
             "environment": "server"
         }
     ],

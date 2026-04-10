@@ -8,16 +8,16 @@
     "contact": {},
     "license": "All-Rights-Reserved",
     "icon": "assets/dragons_revamped/icon.png",
-    "environment": "server",
+    "environment": "*",
     "entrypoints": {
-        "server": [
+        "main": [
             "dev.rolypolyvole.dragonsrevamped.DragonsRevamped"
         ]
     },
     "mixins": [
         {
             "config": "dragons-revamped.mixins.json",
-            "environment": "server"
+            "environment": "*"
         }
     ],
     "depends": {

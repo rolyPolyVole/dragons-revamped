@@ -93,6 +93,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         getAttribute(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE).setBaseValue(1.0);
 
+        if (level.isClientSide()) return;
+
         this.attackManager = new DragonAttackManager(self());
         this.abilityManager = new DragonAbilityManager(self());
     }

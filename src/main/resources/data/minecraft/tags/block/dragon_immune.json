@@ -3,6 +3,7 @@
     "values": [
         "minecraft:deepslate_tile_stairs",
         "minecraft:deepslate_tile_slab",
+        "minecraft:black_candle",
         "minecraft:beacon",
         "minecraft:jukebox",
         "#minecraft:beacon_base_blocks"

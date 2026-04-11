@@ -90,6 +90,7 @@ class DragonRageAbility(
 
             if (this.dragon.health <= this.dragon.maxHealth * 0.5f) {
                 this.hasPerformed = true
+                transition(State.DONE)
             }
 
             return

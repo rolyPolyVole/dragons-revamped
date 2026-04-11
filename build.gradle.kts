@@ -7,7 +7,14 @@ plugins {
     id("maven-publish")
 }
 
-version = project.property("mod_version") as String
+version = ProcessBuilder("git", "describe", "--tags", "--always", "--dirty")
+    .directory(project.projectDir)
+    .start()
+    .inputStream
+    .bufferedReader()
+    .readText()
+    .trim()
+
 group = project.property("maven_group") as String
 
 base {

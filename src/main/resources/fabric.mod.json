@@ -7,7 +7,7 @@
     "authors": [],
     "contact": {},
     "license": "All-Rights-Reserved",
-    "icon": "assets/dragons_revamped/icon.png",
+    "icon": "icon.jpeg",
     "environment": "*",
     "entrypoints": {
         "main": [

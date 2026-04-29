@@ -5,6 +5,7 @@ import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -14,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
@@ -36,8 +37,10 @@ public abstract class ServerPlayerMixin extends Player {
         this.deathSource = damageSource;
     }
 
-    @ModifyVariable(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At(value = "STORE", ordinal = 0), name = "component")
-    private Component customDeathMessage(Component value) {
+    @Redirect(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;"))
+    private Component customDeathMessage(CombatTracker tracker) {
+        Component value = tracker.getDeathMessage();
+
         if (deathSource == null || deathSource.getDirectEntity() == null) {
             return value;
         }

@@ -1,5 +1,8 @@
 package dev.rolypolyvole.dragonsrevamped.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
@@ -61,9 +64,6 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Shadow
     public int dragonDeathTime;
-
-    @Shadow
-    protected abstract void reallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f);
 
     @Unique
     private EnderDragonPart hitPart;
@@ -127,10 +127,10 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             .count();
     }
 
-    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EnderDragonFight;updateDragon(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V", shift = At.Shift.BEFORE))
+    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EnderDragonFight;updateDragon(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V"))
     private void beforeUpdateDragon(CallbackInfo info) {
         if (getHealth() <= 1.0F) return;
-        
+
         updateMaxHealth();
     }
 
@@ -177,7 +177,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         for (Entity entity : list) {
             if (entity instanceof LivingEntity) {
-                DamageSource damageSource = DragonDamageTypes.INSTANCE.dragonBodyHit(serverLevel, self());
+                DamageSource damageSource = DragonDamageTypes.dragonBodyHit(serverLevel, self());
                 entity.hurtServer(serverLevel, damageSource, damage);
                 EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
             }
@@ -206,7 +206,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
                 boolean onCooldown = livingEntity.getLastHurtByMobTimestamp() >= entity.tickCount - 2;
 
                 if (!isSitting && !onCooldown) {
-                    DamageSource damageSource = DragonDamageTypes.INSTANCE.dragonBodyHit(serverLevel, self());
+                    DamageSource damageSource = DragonDamageTypes.dragonBodyHit(serverLevel, self());
                     entity.hurtServer(serverLevel, damageSource, damage);
                     EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
                 }
@@ -227,8 +227,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         this.damageReceived = amount;
     }
 
-    @Redirect(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void customDamage(EnderDragon dragon, ServerLevel serverLevel, DamageSource source, float f) {
+    @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
+    private void customDamage(EnderDragon dragon, ServerLevel serverLevel, DamageSource source, float damage, Operation<Void> original) {
         float adjusted = phaseManager.getCurrentPhase().onHurt(source, damageReceived);
 
         float finalDamage = (hitPart == head || hitPart == neck)
@@ -243,7 +243,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             finalDamage = getMaxHealth() * 0.25F;
         }
 
-        this.reallyHurt(serverLevel, source, finalDamage);
+        original.call(dragon, serverLevel, source, finalDamage);
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = this.getHealth() <= 1.0F ? 0 : Math.round(this.getHealth());
@@ -267,26 +267,24 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return ticksSinceLastHurt > threshold ? getMaxHealth() * 0.01F : 1.0F + ((float) playerCount) * 0.1F;
     }
 
-    @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
-    private boolean ignoreHurtTime(EnderDragon instance) {
+    @ModifyExpressionValue(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
+    private boolean ignoreHurtTime(boolean original) {
         return false;
     }
 
-    @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;getFlySpeed()F"))
-    private float getFlySpeed(DragonPhaseInstance instance) {
-        float original = Math.max(1.0F, instance.getFlySpeed());
+    @WrapOperation(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;getFlySpeed()F"))
+    private float getFlySpeed(DragonPhaseInstance instance, Operation<Float> original) {
+        float speed = Math.max(1.0F, original.call(instance));
 
         if (instance.getPhase() == EnderDragonPhase.CHARGING_PLAYER) {
-            return original * 2.4F;
+            return speed * 2.4F;
         } else {
-            return original * 1.7F;
+            return speed * 1.7F;
         }
     }
 
-    @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;getTurnSpeed()F"))
-    private float getTurnSpeed(DragonPhaseInstance instance) {
-        float original = instance.getTurnSpeed();
-
+    @ModifyExpressionValue(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;getTurnSpeed()F"))
+    private float getTurnSpeed(float original) {
         return original * 1.7F * attackManager.getTurnSpeedMultiplier();
     }
 
@@ -295,16 +293,16 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return original * 1.7F * attackManager.getSpeedMultiplier();
     }
 
-    @Redirect(method = "checkWalls", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))
-    private boolean breakBlockWithAnimation(ServerLevel level, BlockPos pos, boolean flags) {
+    @WrapOperation(method = "checkWalls", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))
+    private boolean breakBlockWithAnimation(ServerLevel level, BlockPos pos, boolean movedByPiston, Operation<Boolean> original) {
         BlockState state = level.getBlockState(pos);
-        boolean result = level.removeBlock(pos, flags);
+        boolean removed = original.call(level, pos, movedByPiston);
 
-        if (result) {
+        if (removed) {
             ExplosionAnimation.INSTANCE.play(level, List.of(new Pair<>(pos.immutable(), state)), 0.4);
         }
 
-        return result;
+        return removed;
     }
 
     @ModifyConstant(method = "checkCrystals()V", constant = @Constant(doubleValue = 32.0))

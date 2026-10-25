@@ -1,7 +1,9 @@
 package dev.rolypolyvole.dragonsrevamped.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -11,7 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enderman;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -19,7 +20,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -34,22 +34,20 @@ public abstract class AreaEffectCloudMixin extends Entity {
     @Shadow
     public abstract float getRadius();
 
-    protected AreaEffectCloudMixin(EntityType<? extends Monster> entityType, Level level) {
+    protected AreaEffectCloudMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
-    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
-    private <T extends Entity> List<T> filterAndBuffEndermen(Level level, Class<T> entityClass, AABB aabb) {
-        List<T> entities = level.getEntitiesOfClass(entityClass, aabb);
-
+    @ModifyExpressionValue(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
+    private List<LivingEntity> filterAndBuffEndermen(List<LivingEntity> entities) {
         if (!(this.getOwner() instanceof EnderDragon)) {
             return entities;
         }
 
         float radius = this.getRadius();
-        List<T> filtered = new ArrayList<>();
+        List<LivingEntity> filtered = new ArrayList<>();
 
-        for (T entity : entities) {
+        for (LivingEntity entity : entities) {
             if (entity instanceof CrystalProtector.CrystalProtectorHorse) continue;
             if (entity instanceof CrystalProtector) continue;
 
@@ -69,7 +67,7 @@ public abstract class AreaEffectCloudMixin extends Entity {
     }
 
     @Inject(method = "serverTick", at = @At("HEAD"))
-    private void corrodeItems(net.minecraft.server.level.ServerLevel serverLevel, CallbackInfo ci) {
+    private void corrodeItems(ServerLevel serverLevel, CallbackInfo ci) {
         if (!(this.getOwner() instanceof EnderDragon)) return;
 
         float radius = this.getRadius();

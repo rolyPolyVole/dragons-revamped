@@ -19,7 +19,7 @@ public class CombatRulesMixin {
 
     @Inject(method = "getDamageAfterAbsorb", at = @At("RETURN"), cancellable = true)
     private static void bodyHitArmorBypass(LivingEntity entity, float damage, DamageSource source, float armor, float armorToughness, CallbackInfoReturnable<Float> cir) {
-        if (!source.is(DragonDamageTypes.INSTANCE.getDRAGON_BODY_HIT())) return;
+        if (!source.is(DragonDamageTypes.DRAGON_BODY_HIT)) return;
 
         float absorbed = damage - cir.getReturnValueF();
         cir.setReturnValue(damage - absorbed * (1.0F - ARMOR_BREACH));

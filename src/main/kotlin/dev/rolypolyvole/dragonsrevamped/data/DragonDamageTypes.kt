@@ -1,7 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.data
 
 import dev.rolypolyvole.dragonsrevamped.DragonsRevamped
-import net.minecraft.core.Holder
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
@@ -11,35 +10,23 @@ import net.minecraft.world.damagesource.DamageType
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 
 object DragonDamageTypes {
-    val DRAGON_LIGHTNING: ResourceKey<DamageType> = ResourceKey.create(
-        Registries.DAMAGE_TYPE,
-        Identifier.fromNamespaceAndPath(DragonsRevamped.MOD_ID, "dragon_lightning")
-    )
+    @JvmField
+    val DRAGON_LIGHTNING: ResourceKey<DamageType> = create("dragon_lightning")
 
-    val DRAGON_BODY_HIT: ResourceKey<DamageType> = ResourceKey.create(
-        Registries.DAMAGE_TYPE,
-        Identifier.fromNamespaceAndPath(DragonsRevamped.MOD_ID, "dragon_body_hit")
-    )
+    @JvmField
+    val DRAGON_BODY_HIT: ResourceKey<DamageType> = create("dragon_body_hit")
 
-    fun dragonLightning(level: ServerLevel): Holder<DamageType> {
-        return level.registryAccess()
-            .lookupOrThrow(Registries.DAMAGE_TYPE)
-            .get(DRAGON_LIGHTNING.identifier())
-            .orElseThrow()
-    }
+    @JvmStatic
+    fun dragonLightning(level: ServerLevel, dragon: EnderDragon): DamageSource = source(level, DRAGON_LIGHTNING, dragon)
 
-    fun dragonLightning(level: ServerLevel, dragon: EnderDragon): DamageSource {
-        return DamageSource(dragonLightning(level), dragon)
-    }
+    @JvmStatic
+    fun dragonBodyHit(level: ServerLevel, dragon: EnderDragon): DamageSource = source(level, DRAGON_BODY_HIT, dragon)
 
-    fun dragonBodyHit(level: ServerLevel): Holder<DamageType> {
-        return level.registryAccess()
-            .lookupOrThrow(Registries.DAMAGE_TYPE)
-            .get(DRAGON_BODY_HIT.identifier())
-            .orElseThrow()
-    }
+    private fun create(name: String): ResourceKey<DamageType> =
+        ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(DragonsRevamped.MOD_ID, name))
 
-    fun dragonBodyHit(level: ServerLevel, dragon: EnderDragon): DamageSource {
-        return DamageSource(dragonBodyHit(level), dragon)
+    private fun source(level: ServerLevel, type: ResourceKey<DamageType>, dragon: EnderDragon): DamageSource {
+        val holder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(type)
+        return DamageSource(holder, dragon)
     }
 }

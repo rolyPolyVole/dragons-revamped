@@ -76,7 +76,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun beforeMove() {
         when (stage) {
             Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.diveSpeedMultiplier)
-            Stage.LINGER -> limitClimbRate()
+            Stage.LINGER -> slowDown()
         }
     }
 
@@ -109,9 +109,12 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
     }
 
-    private fun limitClimbRate() {
+    private fun slowDown() {
         val movement = dragon.deltaMovement
-        dragon.deltaMovement = Vec3(movement.x, movement.y.coerceIn(-MAX_VERTICAL_SPEED, MAX_VERTICAL_SPEED), movement.z)
+        val horizontal = Vec3(movement.x, 0.0, movement.z)
+        val cappedHorizontal = if (horizontal.length() > MAX_HORIZONTAL_SPEED) horizontal.normalize().scale(MAX_HORIZONTAL_SPEED) else horizontal
+
+        dragon.deltaMovement = cappedHorizontal.add(0.0, movement.y.coerceIn(-MAX_VERTICAL_SPEED, MAX_VERTICAL_SPEED), 0.0)
     }
 
     private fun pourBreath() {
@@ -159,11 +162,12 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         Vec3(player.x, player.blockPosition().highestBlockY(level).y + HOVER_HEIGHT, player.z)
 
     private companion object {
-        const val DIVE_SPEED = 0.9
+        const val DIVE_SPEED = 1.8
         const val HOVER_HEIGHT = 8.0
         const val ARRIVAL_DISTANCE = 4.0
         const val MAX_DIVE_TICKS = 200
         const val LINGER_TICKS = 100
+        const val MAX_HORIZONTAL_SPEED = 0.4
         const val MAX_VERTICAL_SPEED = 0.08
 
         const val PARTICLES_PER_TICK = 14

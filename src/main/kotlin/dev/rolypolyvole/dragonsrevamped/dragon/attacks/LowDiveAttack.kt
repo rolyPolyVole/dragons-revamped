@@ -2,7 +2,6 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
-import dev.rolypolyvole.dragonsrevamped.dragon.turnTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
@@ -41,7 +40,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private enum class Stage {
-        DIVE, HOVER, RISE
+        DIVE, LINGER
     }
 
     private val breath = PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)
@@ -69,21 +68,19 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         when (stage) {
             Stage.DIVE -> tickDive()
-            Stage.HOVER -> tickHover()
-            Stage.RISE -> if (dragon.position().distanceTo(destination) < 5.0 || stageTicks > MAX_RISE_TICKS) shouldEnd = true
+            Stage.LINGER -> tickLinger()
         }
     }
 
     override fun beforeMove() {
         when (stage) {
             Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.diveSpeedMultiplier)
-            Stage.HOVER -> dragon.deltaMovement = Vec3.ZERO
-            Stage.RISE -> dragon.flyTowards(destination, RISE_SPEED)
+            Stage.LINGER -> limitClimbRate()
         }
     }
 
     override fun end() {
-        restoreNormalPhase()
+        if (stage == Stage.DIVE) restoreNormalPhase()
     }
 
     override fun shouldEnd(): Boolean = shouldEnd
@@ -102,30 +99,30 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
 
         if (dragon.position().distanceTo(destination) < ARRIVAL_DISTANCE || stageTicks > MAX_DIVE_TICKS) {
-            stage = Stage.HOVER
+            stage = Stage.LINGER
             stageTicks = 0
-            hover()
+            restoreNormalPhase()
         }
     }
 
-    private fun tickHover() {
-        val player = target?.takeIf(::isValidTarget)
-        player?.let { dragon.turnTowards(it.position(), 6.0F) }
+    private fun tickLinger() {
+        val phase = dragon.phaseManager.currentPhase
+
+        if (stageTicks >= LINGER_TICKS || phase.isSitting || phase is DragonLandingApproachPhase || phase is DragonLandingPhase) {
+            shouldEnd = true
+            return
+        }
 
         pourBreath()
 
         if (stageTicks % CLOUD_INTERVAL == CLOUD_DELAY) {
             spawnBreathCloud()
         }
+    }
 
-        if (stageTicks >= HOVER_TICKS) {
-            val away = player?.let { dragon.position().subtract(it.position()).multiply(1.0, 0.0, 1.0).normalize() } ?: Vec3.ZERO
-            destination = dragon.position().add(Vec3(away.x, 1.0, away.z).normalize().scale(RISE_DISTANCE))
-
-            stage = Stage.RISE
-            stageTicks = 0
-            chargeTowards(destination)
-        }
+    private fun limitClimbRate() {
+        val movement = dragon.deltaMovement
+        dragon.deltaMovement = Vec3(movement.x, movement.y.coerceIn(-MAX_VERTICAL_SPEED, MAX_VERTICAL_SPEED), movement.z)
     }
 
     private fun pourBreath() {
@@ -178,14 +175,12 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     private companion object {
         const val DIVE_SPEED = 0.9
-        const val RISE_SPEED = 1.0
         const val HOVER_HEIGHT = 8.0
         const val ARRIVAL_DISTANCE = 4.0
         const val RETARGET_INTERVAL = 5
         const val MAX_DIVE_TICKS = 200
-        const val HOVER_TICKS = 100
-        const val MAX_RISE_TICKS = 100
-        const val RISE_DISTANCE = 40.0
+        const val LINGER_TICKS = 100
+        const val MAX_VERTICAL_SPEED = 0.08
 
         const val PARTICLES_PER_TICK = 14
         const val POUR_WIDTH = 1.4

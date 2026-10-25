@@ -30,8 +30,6 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-// needs code formatting
-
 class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     private var orbitCrystal: EndCrystal? = null
@@ -56,7 +54,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     override fun shouldBeSaved(): Boolean = false
 
-    fun hasCrystal(): Boolean = orbitCrystal != null && orbitCrystal!!.isAlive
+    fun hasCrystal(): Boolean = orbitCrystal?.isAlive == true
 
     fun spawnWithMount(serverLevel: ServerLevel) {
         serverLevel.addFreshEntity(this)
@@ -162,8 +160,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         val distSqr = distanceToSqr(target)
         val enchantments = level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
 
-        val standingPos = target.standingBlockPos()
-        val path = navigation.createPath(standingPos, 0)
+        val path = navigation.createPath(target.standingBlockPos(), 0)
         val canReach = path != null && path.canReach()
 
         if (canReach) outOfReachTicks = 0 else outOfReachTicks++
@@ -216,12 +213,10 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     override fun hurtServer(serverLevel: ServerLevel, damageSource: DamageSource, amount: Float): Boolean {
         val result = super.hurtServer(serverLevel, damageSource, amount)
+        val player = damageSource.entity as? ServerPlayer
 
-        if (result && damageSource.entity is ServerPlayer) {
-            val player = damageSource.entity as ServerPlayer
-            val health = health.roundToInt()
-            val message = Component.literal("❤ Protector Health: $health").withStyle(ChatFormatting.DARK_AQUA)
-
+        if (result && player != null) {
+            val message = Component.literal("❤ Protector Health: ${health.roundToInt()}").withStyle(ChatFormatting.DARK_AQUA)
             player.sendSystemMessage(message, true)
         }
 

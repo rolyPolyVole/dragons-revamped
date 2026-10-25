@@ -5,6 +5,7 @@ import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
+import dev.rolypolyvole.dragonsrevamped.util.ExtnKt;
 import kotlin.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -121,9 +122,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Unique
     private long nearbyPlayerCount() {
-        Vec3 center = Vec3.atCenterOf(self().getFightOrigin());
         return level().players().stream()
-            .filter(p -> p.position().distanceToSqr(center) < 40000.0)
+            .filter(player -> ExtnKt.isInArena(self(), player))
             .count();
     }
 
@@ -255,13 +255,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @ModifyConstant(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", constant = @Constant(floatValue = 0.25F))
     private float customTakeoffThreshold(float original) {
-        EnderDragon dragon = self();
-
-        float max = dragon.getMaxHealth();
-        if (max <= 0.0F) return original;
-
-        float threshold = 0.15F * max;
-        return threshold / max;
+        return 0.15F;
     }
 
     @ModifyConstant(method = "checkCrystals()V", constant = @Constant(floatValue = 1.0F))

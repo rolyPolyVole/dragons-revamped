@@ -1,5 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.xz
 import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.server.level.ServerPlayer
@@ -35,7 +37,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var resurfacing = false
     private var shouldEnd = false
 
-    var speedMultiplier: Double = 1.0
+    var chargeSpeedMultiplier: Double = 1.0
 
     override fun tick() {
         this.ticks++
@@ -87,7 +89,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         val to = (targetLocation ?: return).subtract(dragon.position())
         val movement = to.normalize()
-        val speed = (if (resurfacing) 1.2 else 1.8) * speedMultiplier
+        val speed = (if (resurfacing) 1.2 else 1.8) * chargeSpeedMultiplier
 
         dragon.deltaMovement = movement.scale(speed)
     }
@@ -103,7 +105,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun start(): Boolean {
-        this.target = nearbyPlayers()
+        this.target = dragon.nearbyPlayers()
             .filter(::isTargetValid)
             .randomOrNull()
             ?: run { this.shouldEnd = true; return false }
@@ -111,7 +113,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         this.targetLocation = this.getTargetLocation()
 
         chargeTowards(targetLocation!!)
-        broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
 
         return true
     }

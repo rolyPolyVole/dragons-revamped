@@ -2,6 +2,8 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.minecraft.ChatFormatting
 import net.minecraft.core.particles.ParticleTypes
@@ -25,16 +27,20 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.cos
 import kotlin.math.sin
 
-// needs format code
-// also kinda vibe coded
-
 class DragonRageAbility(
     dragon: EnderDragon,
     manager: DragonAbilityManager
 ) : AbstractDragonAbility(dragon, manager) {
+
     enum class State {
         IDLE, ASCENDING, GATHERING, EXPLODING, ROARING, DONE
     }
+
+    private data class FloatingBlock(
+        val display: Display.BlockDisplay,
+        val blockState: BlockState,
+        val startPos: Vec3
+    )
 
     var state = State.IDLE
         private set
@@ -44,13 +50,7 @@ class DragonRageAbility(
     private var firstTick = true
 
     private val level = this.dragon.level() as ServerLevel
-    private val center get() = Vec3(0.0, 128.0, 0.0)
-
-    private data class FloatingBlock(
-        val display: Display.BlockDisplay,
-        val blockState: BlockState,
-        val startPos: Vec3
-    )
+    private val center = Vec3(0.0, 128.0, 0.0)
 
     private val floatingBlocks = mutableListOf<FloatingBlock>()
 
@@ -58,11 +58,9 @@ class DragonRageAbility(
 
     override fun onBeforeMove() {
         if (this.state == State.ASCENDING) {
-            val current = this.dragon.position()
-            val direction = this.center.subtract(current)
-            val dist = direction.length()
+            val direction = this.center.subtract(this.dragon.position())
 
-            this.dragon.deltaMovement = if (dist > 2.0) {
+            this.dragon.deltaMovement = if (direction.length() > 2.0) {
                 direction.normalize().scale(1.6)
             } else {
                 Vec3.ZERO
@@ -86,6 +84,7 @@ class DragonRageAbility(
     private fun checkTrigger() {
         if (this.firstTick) {
             this.firstTick = false
+
             cleanUpBlockDisplays()
 
             if (this.dragon.health <= this.dragon.maxHealth * 0.5f) {
@@ -122,17 +121,15 @@ class DragonRageAbility(
         this.dragon.phaseManager.setPhase(EnderDragonPhase.HOVERING)
 
         if (this.stateTicks <= 20) {
-            this.manager.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 1.5f - this.stateTicks * 0.05f)
+            this.dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 1.5F - this.stateTicks * 0.05F)
         }
 
         val angle = this.stateTicks * 0.3
         val radius = 3.0
-        val px = this.dragon.x + cos(angle) * radius
-        val pz = this.dragon.z + sin(angle) * radius
 
         this.manager.sendParticles(
             PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F),
-            px, this.dragon.y + 1.0, pz,
+            this.dragon.x + cos(angle) * radius, this.dragon.y + 1.0, this.dragon.z + sin(angle) * radius,
             5, 0.2, 0.5, 0.2, 0.0
         )
 
@@ -156,7 +153,7 @@ class DragonRageAbility(
         }
 
         if (this.stateTicks % 20 == 0) {
-            this.manager.broadcastSound(SoundEvents.BEACON_ACTIVATE, pitch = 0.5f + progress.toFloat())
+            this.dragon.broadcastSound(SoundEvents.BEACON_ACTIVATE, pitch = 0.5F + progress.toFloat())
         }
 
         this.manager.sendParticles(
@@ -177,18 +174,13 @@ class DragonRageAbility(
             this.dragon, this.dragon.damageSources().dragonBreath(),
             null,
             explosionCenter.x, explosionCenter.y, explosionCenter.z,
-            12.0f, false,
+            12.0F, false,
             Level.ExplosionInteraction.NONE
         )
 
         for (block in this.floatingBlocks) {
             val display = block.display
             display.discard()
-
-            val falling = FallingBlockEntity.fall(this.level, display.blockPosition(), block.blockState)
-            falling.dropItem = false
-            falling.time = 1
-            falling.disableDrop()
 
             val direction = Vec3(
                 1.0 - this.level.random.nextDouble() * 2.0,
@@ -197,16 +189,19 @@ class DragonRageAbility(
             ).normalize()
 
             val speed = 1.0 + this.level.random.nextDouble() * 1.5
+            val velocity = direction.scale(speed).add(0.0, 0.5 + this.level.random.nextDouble(), 0.0)
 
-            falling.deltaMovement = direction
-                .scale(speed)
-                .add(0.0, 0.5 + this.level.random.nextDouble(), 0.0)
+            val falling = FallingBlockEntity.fall(this.level, display.blockPosition(), block.blockState)
+            falling.dropItem = false
+            falling.time = 1
+            falling.disableDrop()
+            falling.deltaMovement = velocity
         }
 
         this.floatingBlocks.clear()
 
-        this.manager.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.5f)
-        this.manager.broadcastSound(SoundEvents.GENERIC_EXPLODE.value(), pitch = 0.5f)
+        this.dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.5F)
+        this.dragon.broadcastSound(SoundEvents.GENERIC_EXPLODE.value(), pitch = 0.5F)
 
         this.manager.sendParticles(
             ParticleTypes.EXPLOSION_EMITTER,
@@ -223,24 +218,22 @@ class DragonRageAbility(
         this.dragon.phaseManager.setPhase(EnderDragonPhase.HOVERING)
 
         if (this.stateTicks <= 20) {
-            this.manager.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.5f + this.stateTicks * 0.05f)
+            this.dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.5F + this.stateTicks * 0.05F)
         }
 
         if (this.stateTicks == 20) {
             respawnAllCrystals()
 
             EntityTypes.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
-                it.snapTo(dragon.x, dragon.y, dragon.z)
+                it.snapTo(this.dragon.x, this.dragon.y, this.dragon.z)
                 it.setVisualOnly(true)
                 this.level.addFreshEntity(it)
             }
 
-            this.manager.broadcastMessage(
+            this.dragon.broadcastMessage(
                 Component.empty()
                     .append(Component.literal("[Ender Dragon] ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(
-                        Component.literal("My strongest soldiers have arrived to end this battle!").withStyle(
-                            ChatFormatting.WHITE))
+                    .append(Component.literal("My strongest soldiers have arrived to end this battle!").withStyle(ChatFormatting.WHITE))
             )
         }
 
@@ -263,20 +256,20 @@ class DragonRageAbility(
         val random = this.level.random
 
         repeat(150) {
-            val num = random.nextFloat()
+            val roll = random.nextFloat()
 
             val state = when {
-                num > 0.35f -> Blocks.END_STONE.defaultBlockState()
-                num > 0.175f -> Blocks.OBSIDIAN.defaultBlockState()
+                roll > 0.35F -> Blocks.END_STONE.defaultBlockState()
+                roll > 0.175F -> Blocks.OBSIDIAN.defaultBlockState()
                 else -> Blocks.CRYING_OBSIDIAN.defaultBlockState()
             }
 
             val angle = random.nextDouble() * Math.PI * 2
-            val dist = 30.0 + random.nextDouble() * 45.0
+            val distance = 30.0 + random.nextDouble() * 45.0
             val startPos = this.center.add(
-                cos(angle) * dist,
+                cos(angle) * distance,
                 -20.0 + random.nextDouble() * 40.0,
-                sin(angle) * dist
+                sin(angle) * distance
             )
 
             val display = Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, this.level)
@@ -291,32 +284,18 @@ class DragonRageAbility(
 
     private fun cleanUpBlockDisplays() {
         val area = AABB.ofSize(this.center, 200.0, 200.0, 200.0)
+
         this.level.getEntitiesOfClass(Display.BlockDisplay::class.java, area)
             .filter { RAGE_BLOCK_TAG in it.entityTags() }
             .forEach { it.discard() }
     }
 
-    companion object {
-        private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
-    }
-
     private fun respawnAllCrystals() {
-        val crystalLocations = CustomEndSpikes.getCrystalLocations(this.level)
+        for (pos in CustomEndSpikes.getCrystalLocations(this.level)) {
+            val area = AABB.ofSize(pos, 3.0, 3.0, 3.0)
 
-        for (pos in crystalLocations) {
-            val existing = this.level.getEntitiesOfClass(
-                EndCrystal::class.java,
-                AABB.ofSize(pos, 3.0, 3.0, 3.0)
-            )
-
-            existing.forEach { it.discard() }
-
-            val protectors = this.level.getEntitiesOfClass(
-                Skeleton::class.java,
-                AABB.ofSize(pos, 3.0, 3.0, 3.0)
-            )
-
-            protectors.forEach { it.discard() }
+            this.level.getEntitiesOfClass(EndCrystal::class.java, area).forEach { it.discard() }
+            this.level.getEntitiesOfClass(Skeleton::class.java, area).forEach { it.discard() }
 
             val crystal = EntityTypes.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: continue
             crystal.setPos(pos)
@@ -332,5 +311,9 @@ class DragonRageAbility(
 
         this.manager.crystalRespawnAbility.resetCooldowns()
         this.manager.crystalRespawnAbility.sendCrystalCount()
+    }
+
+    companion object {
+        private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
     }
 }

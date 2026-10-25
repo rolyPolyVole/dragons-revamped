@@ -1,7 +1,10 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import dev.rolypolyvole.dragonsrevamped.util.sendSound
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
@@ -41,18 +44,18 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         if (this.ticks++ == 0) {
             hover()
-            broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
         }
 
-        nearbyPlayers().filter(::isPlayerExposed).forEach {
-            playSound(it, SoundEvents.FLINTANDSTEEL_USE, pitch = 2.0F)
+        dragon.nearbyPlayers().filter(::isPlayerExposed).forEach {
+            it.sendSound(SoundEvents.FLINTANDSTEEL_USE, pitch = 2.0F)
         }
 
         if (ticks < 50) return
 
         playEffect()
 
-        nearbyPlayers()
+        dragon.nearbyPlayers()
             .filter(::isPlayerExposed)
             .forEach(::strikePlayer)
 
@@ -82,7 +85,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         this.outpost = this.getOutpostLocation()
 
         chargeTowards(outpost)
-        broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
 
         return true
     }
@@ -90,9 +93,6 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun end() {
         restoreNormalPhase()
     }
-
-    override fun getSpeedMultiplier(): Float = 1.0f
-    override fun getTurnSpeedMultiplier(): Float = 1.0f
 
     override fun shouldEnd(): Boolean = shouldEnd
 
@@ -129,6 +129,6 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             level.addFreshEntity(it)
         }
 
-        broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
     }
 }

@@ -2,6 +2,8 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
@@ -30,7 +32,7 @@ class CrystalRespawnAbility(
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = this.manager.nearbyPlayers().size.coerceAtLeast(1)
+        val playerCount = this.dragon.nearbyPlayers().size.coerceAtLeast(1)
         val crystals = getTotalCrystals()
 
         val min = 400
@@ -67,7 +69,7 @@ class CrystalRespawnAbility(
 
         this.level.addFreshEntity(crystal)
 
-        this.manager.broadcastMessage(
+        this.dragon.broadcastMessage(
             Component.literal("An End Crystal has respawned!").withColor(0xFF55FF)
         )
 
@@ -100,13 +102,13 @@ class CrystalRespawnAbility(
 
         return this.level
             .getEntitiesOfClass(CrystalProtector::class.java, aabb)
-            .filter(CrystalProtector::hasCrystal).size
+            .count(CrystalProtector::hasCrystal)
     }
 
     fun sendCrystalCount() {
         val count = getTotalCrystals()
         val message = Component.literal("✦ Crystals Remaining: $count").withStyle(ChatFormatting.DARK_PURPLE)
 
-        this.manager.broadcastMessage(message, true)
+        this.dragon.broadcastMessage(message, true)
     }
 }

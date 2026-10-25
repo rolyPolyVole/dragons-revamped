@@ -1,5 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
@@ -32,7 +34,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var shouldEnd = false
 
     override fun start(): Boolean {
-        val playerCount = nearbyPlayers().size
+        val playerCount = dragon.nearbyPlayers().size
         this.chargesRemaining = 4.coerceAtLeast(playerCount)
 
         return startNextCharge()
@@ -51,7 +53,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return false
         }
 
-        charge.speedMultiplier = 1.3
+        charge.chargeSpeedMultiplier = 1.3
 
         this.currentCharge = charge
         this.chargesRemaining--
@@ -61,7 +63,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun tick() {
         if (roarTicks++ <= 10) {
-            broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, volume = 2.0F, pitch = 0.5F + roarTicks * 0.2F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, volume = 2.0F, pitch = 0.5F + roarTicks * 0.2F)
         }
 
         val charge = currentCharge ?: run { this.shouldEnd = true; return }

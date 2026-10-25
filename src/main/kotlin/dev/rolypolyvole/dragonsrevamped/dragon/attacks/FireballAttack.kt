@@ -1,6 +1,8 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.ExplosiveDragonFireball
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
 import net.minecraft.server.level.ServerPlayer
@@ -8,6 +10,7 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
+import net.minecraft.world.level.block.LevelEvent
 import net.minecraft.world.phys.Vec3
 import kotlin.math.*
 import kotlin.reflect.KClass
@@ -37,7 +40,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var roarTicks = 0
     private var ticks = 0
 
-    private val minTargets = ceil(sqrt(nearbyPlayers().size.toDouble()))
+    private val minTargets = ceil(sqrt(dragon.nearbyPlayers().size.toDouble()))
     private var ticksUntilChangeTarget = 0
     private var target: ServerPlayer? = null
 
@@ -46,14 +49,14 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun tick() {
         if (roarTicks++ <= 10) {
-            broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
         }
 
         if (!reachedOutpost) return
 
         if (ticks == 0) {
             hover()
-            broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
         }
 
         spawnMouthBreathParticles()
@@ -73,7 +76,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
                 return
             }
 
-            this.target = nearbyPlayers()
+            this.target = dragon.nearbyPlayers()
                 .filter { !it.isCreative && !it.isSpectator && it.isAlive }
                 .filter { it.position().distanceToSqr(dragon.position()) < 22500.0 }
                 .filter { dragon.hasLineOfSight(it) }
@@ -119,7 +122,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         this.outpost = this.getOutpostLocation()
 
         chargeTowards(outpost)
-        broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
 
         return true
     }
@@ -127,9 +130,6 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun end() {
         restoreNormalPhase()
     }
-
-    override fun getSpeedMultiplier(): Float = 1.0f
-    override fun getTurnSpeedMultiplier(): Float = 1.0f
 
     override fun shouldEnd(): Boolean = shouldEnd
 
@@ -176,7 +176,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         val mouth = dragon.position().add(mouthOffset).subtract(0.0, 0.5, 0.0)
         val velocity = targetPos.subtract(mouth).normalize()
 
-        level.levelEvent(null, 1017, dragon.blockPosition(), 0)
+        level.levelEvent(null, LevelEvent.SOUND_DRAGON_FIREBALL, dragon.blockPosition(), 0)
 
         val fireball = ExplosiveDragonFireball(level, dragon, velocity)
         fireball.snapTo(mouth.x, mouth.y, mouth.z, 0.0f, 0.0f)

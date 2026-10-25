@@ -2,7 +2,9 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
@@ -22,7 +24,7 @@ class HunterSpawnAbility(
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = this.manager.nearbyPlayers().size.coerceAtLeast(1)
+        val playerCount = this.dragon.nearbyPlayers().size.coerceAtLeast(1)
 
         val base = (1200..1500).random()
         val scaled = (1200 / sqrt(playerCount.toDouble())).toInt()
@@ -63,7 +65,7 @@ class HunterSpawnAbility(
             1
         )
 
-        this.manager.broadcastMessage(
+        this.dragon.broadcastMessage(
             Component.literal("A Crystal Protector joins the battle!").withColor(0xAA00AA)
         )
 

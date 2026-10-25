@@ -29,6 +29,7 @@ class CrystalRespawnAbility(
         .toMutableMap()
 
     private var cooldown = calculateCooldown()
+    private var tooManyCrystals = false
 
     private fun calculateCooldown(): Int {
         val config = ModConfig.current
@@ -45,6 +46,12 @@ class CrystalRespawnAbility(
         crystalLocations.replaceAll { _, value ->
             (value - 1).coerceAtLeast(0)
         }
+
+        if (dragon.tickCount % CRYSTAL_CHECK_INTERVAL == 0) {
+            tooManyCrystals = getTotalCrystals() >= ModConfig.current.crystalRespawnThreshold
+        }
+
+        if (tooManyCrystals) return
 
         if (cooldown > 0) {
             cooldown--
@@ -104,5 +111,9 @@ class CrystalRespawnAbility(
         val message = Component.literal("✦ Crystals Remaining: $count").withStyle(ChatFormatting.DARK_PURPLE)
 
         dragon.broadcastMessage(message, true)
+    }
+
+    private companion object {
+        const val CRYSTAL_CHECK_INTERVAL = 20
     }
 }

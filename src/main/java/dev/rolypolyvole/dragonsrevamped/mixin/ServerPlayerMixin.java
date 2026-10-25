@@ -39,7 +39,7 @@ public abstract class ServerPlayerMixin extends Player {
         if (damageSource.is(DragonDamageTypes.DRAGON_BODY_HIT)) {
             return Component.empty()
                 .append(getDisplayName())
-                .append(" got ran through by ")
+                .append(" got run through by ")
                 .append(attacker.getDisplayName());
         }
 

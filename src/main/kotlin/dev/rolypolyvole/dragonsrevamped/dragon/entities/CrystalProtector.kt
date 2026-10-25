@@ -160,10 +160,12 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         val distSqr = distanceToSqr(target)
         val enchantments = level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
 
-        val path = navigation.createPath(target.standingBlockPos(), 0)
-        val canReach = path != null && path.canReach()
+        if (tickCount % REACH_CHECK_INTERVAL == 0) {
+            val path = navigation.createPath(target.standingBlockPos(), 0)
+            val canReach = path != null && path.canReach()
 
-        if (canReach) outOfReachTicks = 0 else outOfReachTicks++
+            if (canReach) outOfReachTicks = 0 else outOfReachTicks += REACH_CHECK_INTERVAL
+        }
 
         val desired = when {
             outOfReachTicks >= 20 -> Items.BOW
@@ -244,6 +246,10 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         this.horse = null
 
         super.die(damageSource)
+    }
+
+    companion object {
+        private const val REACH_CHECK_INTERVAL = 10
     }
 
     class OrbitCrystal(level: Level) : EndCrystal(EntityTypes.END_CRYSTAL, level) {

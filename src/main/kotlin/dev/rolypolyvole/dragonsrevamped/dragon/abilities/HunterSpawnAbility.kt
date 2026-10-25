@@ -5,13 +5,13 @@ import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
-import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.phys.Vec3
 import kotlin.math.sqrt
 
 class HunterSpawnAbility(
@@ -42,26 +42,23 @@ class HunterSpawnAbility(
     }
 
     private fun spawnHunter() {
-        val offsetX = ((-40..40).random()).toDouble()
-        val offsetZ = ((-40..40).random()).toDouble()
-        val spawnX = this.dragon.fightOrigin.x + offsetX
-        val spawnZ = this.dragon.fightOrigin.z + offsetZ
-        val groundY = BlockPos(spawnX.toInt(), 0, spawnZ.toInt()).highestBlockY(this.level).y.toDouble()
+        val column = this.dragon.fightOrigin.offset((-40..40).random(), 0, (-40..40).random())
+        val spawnPos = Vec3.atBottomCenterOf(column.highestBlockY(this.level))
 
         CrystalProtector(this.level).let {
-            it.setPos(spawnX, groundY, spawnZ)
+            it.setPos(spawnPos)
             it.spawnWithMount(this.level)
         }
 
         EntityTypes.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
-            it.snapTo(spawnX, groundY, spawnZ, 0f, 0f)
+            it.snapTo(spawnPos)
             it.setVisualOnly(true)
             this.level.addFreshEntity(it)
         }
 
         this.manager.sendParticles(
             ParticleTypes.EXPLOSION_EMITTER,
-            spawnX, groundY + 1.0, spawnZ,
+            spawnPos.x, spawnPos.y + 1.0, spawnPos.z,
             1
         )
 

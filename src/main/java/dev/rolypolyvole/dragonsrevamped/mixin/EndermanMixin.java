@@ -25,9 +25,10 @@ public abstract class EndermanMixin extends Monster {
     private void preventDragonTarget(LivingEntity target, CallbackInfo ci) {
         if (target instanceof EnderDragon) {
             ci.cancel();
+            return;
         }
 
-        if (((ServerLevel) level()).getDragons().isEmpty()) return;
+        if (!(level() instanceof ServerLevel serverLevel) || serverLevel.getDragons().isEmpty()) return;
 
         if (target instanceof Endermite || target instanceof DragonSkeleton) {
             ci.cancel();

@@ -49,7 +49,13 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun beforeMove() {
-        if (!resurfacing && target == null || target!!.hasDisconnected()) run { this.shouldEnd = true; return }
+        val target = this.target
+
+        if (target == null || target.hasDisconnected()) {
+            this.shouldEnd = true
+            return
+        }
+
         if (ticks < 20) return
 
         if (ticks == 20) {
@@ -57,16 +63,14 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             this.direction = targetLocation!!.subtract(dragon.position()).normalize()
         }
 
-        if (!resurfacing && ticks > 20 && ticks % 5 == 0) {
-            val player = target ?: return
-            if (!player.hasDisconnected() && player.isAlive) {
-                val newTarget = getTargetLocation()
-                if (newTarget.distanceToSqr(targetLocation!!) < 100.0) {
-                    this.targetLocation = newTarget
-                    this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+        if (!resurfacing && ticks > 20 && ticks % 5 == 0 && target.isAlive) {
+            val newTarget = getTargetLocation()
 
-                    chargeTowards(targetLocation!!)
-                }
+            if (newTarget.distanceToSqr(targetLocation!!) < 100.0) {
+                this.targetLocation = newTarget
+                this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+
+                chargeTowards(targetLocation!!)
             }
         }
 

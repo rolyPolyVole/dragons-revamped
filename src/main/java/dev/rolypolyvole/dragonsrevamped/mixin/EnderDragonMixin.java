@@ -106,8 +106,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Unique
     private boolean finishedCooldown() {
-        boolean firstGeneration = ((EnderDragonFightAccessor) dragonFight).dragonsrevamped$needsStateScanning();
-        return !firstGeneration || tickCount > 15 * 20;
+        boolean firstFight = dragonFight != null && !dragonFight.hasPreviouslyKilledDragon();
+        return !firstFight || tickCount > 15 * 20;
     }
 
     @Unique
@@ -147,7 +147,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         if (shouldTickAttacks()) attackManager.tick();
     }
 
-    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.BEFORE))
+    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;moveRelative(FLnet/minecraft/world/phys/Vec3;)V", shift = At.Shift.AFTER))
     private void beforeMove(CallbackInfo info) {
         if (shouldTickAbilities() && abilityManager.getRageAbility().isActive()) {
             abilityManager.getRageAbility().onBeforeMove();
@@ -335,9 +335,12 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Inject(method = "onCrystalDestroyed", at = @At("TAIL"))
     private void onCrystalDestroyed(ServerLevel serverLevel, EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource, CallbackInfo ci) {
-        if (abilityManager != null) {
+        if (abilityManager == null) return;
+
+        if (!(endCrystal instanceof CrystalProtector.OrbitCrystal)) {
             abilityManager.getCrystalRespawnAbility().onCrystalDestroyed(blockPos);
-            abilityManager.getCrystalRespawnAbility().sendCrystalCount();
         }
+
+        abilityManager.getCrystalRespawnAbility().sendCrystalCount();
     }
 }

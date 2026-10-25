@@ -105,6 +105,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private fun isPlayerExposed(player: Player): Boolean {
+        if (player.isCreative || player.isSpectator || !player.isAlive) return false
+
         val blockY = player.blockPosition().highestBlockY(level).y
         val playerY = player.blockPosition().y
 

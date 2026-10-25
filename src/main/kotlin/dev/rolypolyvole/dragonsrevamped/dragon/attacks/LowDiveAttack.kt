@@ -86,6 +86,8 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun shouldEnd(): Boolean = shouldEnd
 
+    override fun allowsRoaring(): Boolean = stage != Stage.LINGER
+
     private fun tickDive() {
         if (dragon.position().distanceTo(destination) < ARRIVAL_DISTANCE || stageTicks > MAX_DIVE_TICKS) {
             stage = Stage.LINGER
@@ -120,7 +122,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private fun pourBreath() {
         val mouth = mouthPosition()
 
-        if (stageTicks % 20 == 1) {
+        if (stageTicks == 1) {
             level.playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.HOSTILE, 4.0F, 0.6F + random * 0.2F)
         }
 

@@ -104,6 +104,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     }
 
     private fun tickRoar() {
+        if (currentAttack?.allowsRoaring() == false) return
         if (--ticksUntilRoar > 0) return
 
         ticksUntilRoar = nextRoarDelay()

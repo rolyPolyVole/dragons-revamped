@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(EnderDragon.class)
-@SuppressWarnings({"DataFlowIssue", "DiscouragedShift", "NameDoesntMatchTargetClass"})
+@SuppressWarnings("DataFlowIssue")
 public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Shadow

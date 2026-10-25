@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.Objects;
 
 @Mixin(ServerPlayer.class)
-@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class ServerPlayerMixin extends Player {
 
     public ServerPlayerMixin(Level level, GameProfile gameProfile) {

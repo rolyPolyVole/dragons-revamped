@@ -240,7 +240,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         }
 
         if (ModConfig.getCurrent().getLimitMaxDamagePerHit()) {
-            damage = Math.min(damage, getMaxHealth() * (float) ModConfig.getCurrent().getMaxDamagePerHitFraction());
+            damage = Math.min(damage, (float) ModConfig.getCurrent().getMaxDamagePerHit());
         }
 
         return damage;
@@ -322,7 +322,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         exactDamage = true;
 
         try {
-            return original.call(dragon, serverLevel, part, source, Crystals.damageToDragon(crystal, getMaxHealth()));
+            return original.call(dragon, serverLevel, part, source, Crystals.damageToDragon(crystal));
         } finally {
             exactDamage = false;
         }

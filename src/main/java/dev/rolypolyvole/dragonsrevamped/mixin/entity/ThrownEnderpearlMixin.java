@@ -20,7 +20,7 @@ public abstract class ThrownEnderpearlMixin extends Entity {
     @ModifyConstant(method = "onHit", constant = @Constant(floatValue = 0.05F))
     private float increaseEndermiteSpawnChance(float original) {
         if (level() instanceof ServerLevel serverLevel && !serverLevel.getDragons().isEmpty()) {
-            return (float) ModConfig.getCurrent().getEndermiteSpawnChance();
+            return (float) ModConfig.getCurrent().getEndermiteChance();
         }
 
         return original;

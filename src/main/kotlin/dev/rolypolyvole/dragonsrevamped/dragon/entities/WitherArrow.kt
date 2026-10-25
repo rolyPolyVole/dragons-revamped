@@ -5,7 +5,7 @@ import net.minecraft.core.particles.PowerParticleOption
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.monster.Endermite
@@ -53,7 +53,7 @@ class WitherArrow(
     }
 }
 
-class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(EntityType.ENDERMITE, level) {
+class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(EntityTypes.ENDERMITE, level) {
 
     init {
         getAttribute(Attributes.MOVEMENT_SPEED)!!.baseValue = 0.3

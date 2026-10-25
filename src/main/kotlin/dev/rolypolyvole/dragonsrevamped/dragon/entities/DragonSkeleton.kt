@@ -2,7 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.entities
 
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.goal.SpearUseGoal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
@@ -15,7 +15,7 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
+open class DragonSkeleton(level: Level) : Skeleton(EntityTypes.SKELETON, level) {
 
     override fun shouldBeSaved(): Boolean = false
 

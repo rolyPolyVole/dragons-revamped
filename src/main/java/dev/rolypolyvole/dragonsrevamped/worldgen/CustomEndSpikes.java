@@ -7,7 +7,7 @@ import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -15,8 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.level.levelgen.feature.SpikeFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.SpikeConfiguration;
+import net.minecraft.world.level.levelgen.feature.EndSpikeFeature;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ public final class CustomEndSpikes {
             return CRYSTAL_LOCATIONS;
         }
 
-        for (SpikeFeature.EndSpike spike : SpikeFeature.getSpikesForLevel(level)) {
+        for (EndSpikeFeature.EndSpike spike : EndSpikeFeature.getSpikesForLevel(level)) {
             CRYSTAL_LOCATIONS.add(new Vec3(
                     spike.getCenterX() + 0.5,
                     spike.getHeight(),
@@ -63,7 +62,7 @@ public final class CustomEndSpikes {
 
     // ── Spike placement ─────────────────────────────────────────────────
 
-    public static void place(ServerLevelAccessor level, RandomSource ignored, SpikeConfiguration cfg, SpikeFeature.EndSpike spike) {
+    public static void place(ServerLevelAccessor level, EndSpikeFeature feature, EndSpikeFeature.EndSpike spike) {
         if (level instanceof WorldGenRegion) {
             return;
         }
@@ -76,14 +75,14 @@ public final class CustomEndSpikes {
      * Called on the first End world tick after chunk generation completes.
      */
     public static void regenerateSpikes(ServerLevel level) {
-        for (SpikeFeature.EndSpike spike : SpikeFeature.getSpikesForLevel(level)) {
+        for (EndSpikeFeature.EndSpike spike : EndSpikeFeature.getSpikesForLevel(level)) {
             placeSpike(level, spike, true);
         }
 
         LOGGER.info("Regenerated all End spikes");
     }
 
-    private static void placeSpike(ServerLevelAccessor level, SpikeFeature.EndSpike spike, boolean crystals) {
+    private static void placeSpike(ServerLevelAccessor level, EndSpikeFeature.EndSpike spike, boolean crystals) {
         RandomSource sr = spikeRandom(level, spike);
 
         int tipX = spike.getCenterX();
@@ -229,7 +228,7 @@ public final class CustomEndSpikes {
                     .setValue(BlockStateProperties.HALF, Half.TOP);
             setBlock(level, pos, sx, tipBaseY + 4, sz, stair);
 
-            BlockState candle = Blocks.BLACK_CANDLE.defaultBlockState()
+            BlockState candle = Blocks.DYED_CANDLE.black().defaultBlockState()
                     .setValue(BlockStateProperties.LIT, false)
                     .setValue(BlockStateProperties.CANDLES, 4);
             setBlock(level, pos, sx, tipBaseY + 5, sz, candle);
@@ -276,11 +275,11 @@ public final class CustomEndSpikes {
     // ── Crystal spawning ────────────────────────────────────────────────
 
     private static void spawnCrystal(ServerLevelAccessor level, RandomSource sr, int x, int crystalBlockY, int z) {
-        EndCrystal crystal = EntityType.END_CRYSTAL.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
+        EndCrystal crystal = EntityTypes.END_CRYSTAL.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
         if (crystal == null) return;
 
         crystal.setBeamTarget(null);
-        crystal.setInvulnerable(false);
+        crystal.setPermanentlyInvulnerable(false);
         crystal.setShowBottom(false);
         crystal.snapTo(x + 0.5, crystalBlockY, z + 0.5, sr.nextFloat() * 360.0F, 0.0F);
         level.addFreshEntity(crystal);
@@ -290,7 +289,7 @@ public final class CustomEndSpikes {
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    private static RandomSource spikeRandom(ServerLevelAccessor level, SpikeFeature.EndSpike spike) {
+    private static RandomSource spikeRandom(ServerLevelAccessor level, EndSpikeFeature.EndSpike spike) {
         long worldSeed = level.getLevel().getSeed();
         long x = spike.getCenterX();
         long z = spike.getCenterZ();

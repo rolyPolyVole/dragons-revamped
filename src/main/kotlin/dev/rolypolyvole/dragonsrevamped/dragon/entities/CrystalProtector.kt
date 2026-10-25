@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -74,7 +74,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
         val crystal = OrbitCrystal(serverLevel).apply {
             setShowBottom(false)
-            isInvulnerable = true
+            setPermanentlyInvulnerable(true)
             setPos(this@CrystalProtector.position())
         }
 
@@ -240,7 +240,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     override fun die(damageSource: DamageSource) {
         orbitCrystal?.let {
-            it.isInvulnerable = false
+            it.setPermanentlyInvulnerable(false)
             it.hurtServer(level() as ServerLevel, this.damageSources().mobAttack(this), 1.0F)
         }
 
@@ -251,11 +251,11 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         super.die(damageSource)
     }
 
-    class OrbitCrystal(level: Level) : EndCrystal(EntityType.END_CRYSTAL, level) {
+    class OrbitCrystal(level: Level) : EndCrystal(EntityTypes.END_CRYSTAL, level) {
         override fun shouldBeSaved(): Boolean = false
     }
 
-    class CrystalProtectorHorse(level: Level) : Horse(EntityType.HORSE, level) {
+    class CrystalProtectorHorse(level: Level) : Horse(EntityTypes.HORSE, level) {
 
         private var canStand: Boolean = true
 

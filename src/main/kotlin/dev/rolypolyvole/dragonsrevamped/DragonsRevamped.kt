@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped
 
+import dev.rolypolyvole.dragonsrevamped.mixin.EnderDragonFightAccessor
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -23,7 +24,7 @@ class DragonsRevamped : ModInitializer {
     private fun createCustomEndSpikes(server: MinecraftServer) {
         val end = server.getLevel(Level.END)!!
 
-        val firstGeneration = end.dragonFight!!.saveData().needsStateScanning
+        val firstGeneration = (end.dragonFight as EnderDragonFightAccessor).`dragonsrevamped$needsStateScanning`()
         if (!firstGeneration) return
 
         for (x in -8..8) {

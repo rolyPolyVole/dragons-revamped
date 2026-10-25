@@ -134,7 +134,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return dragon.fightOrigin.center.add(
+        return Vec3.atCenterOf(dragon.fightOrigin).add(
             random * 100.0 - 50.0,
             75.0 + random * 35.0,
             random * 100.0 - 50.0

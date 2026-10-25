@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.phys.AABB
@@ -59,7 +59,7 @@ class CrystalRespawnAbility(
             .filterNot(::doesCrystalExist)
             .randomOrNull() ?: return
 
-        val crystal = EntityType.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: return
+        val crystal = EntityTypes.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: return
 
         crystal.setPos(pos)
         crystal.setShowBottom(false)
@@ -80,7 +80,7 @@ class CrystalRespawnAbility(
     }
 
     fun onCrystalDestroyed(pos: BlockPos) {
-        val key = this.crystalLocations.keys.minByOrNull { it.distanceToSqr(pos.center) } ?: return
+        val key = this.crystalLocations.keys.minByOrNull { it.distanceToSqr(Vec3.atCenterOf(pos)) } ?: return
         this.crystalLocations[key] = 600
     }
 
@@ -95,7 +95,7 @@ class CrystalRespawnAbility(
     }
 
     private fun getProtectorCrystals(): Int {
-        val center = this.dragon.fightOrigin.center
+        val center = Vec3.atCenterOf(this.dragon.fightOrigin)
         val aabb = AABB.ofSize(center, 400.0, 400.0, 400.0)
 
         return this.level

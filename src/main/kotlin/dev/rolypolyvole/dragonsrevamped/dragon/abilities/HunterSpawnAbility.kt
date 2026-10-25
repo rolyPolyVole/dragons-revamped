@@ -8,7 +8,7 @@ import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import kotlin.math.sqrt
 
@@ -51,7 +51,7 @@ class HunterSpawnAbility(
             it.spawnWithMount(this.level)
         }
 
-        EntityType.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
+        EntityTypes.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(spawnX, groundY, spawnZ, 0f, 0f)
             it.setVisualOnly(true)
             this.level.addFreshEntity(it)

@@ -21,7 +21,7 @@ abstract class AbstractDragonAttack(protected val dragon: EnderDragon) {
         get() = dragon.level() as ServerLevel
 
     protected fun nearbyPlayers(): List<ServerPlayer> {
-        val center = dragon.fightOrigin.center
+        val center = Vec3.atCenterOf(dragon.fightOrigin)
         return level.players().filter { it.position().distanceToSqr(center) < 40000.0 }
     }
 

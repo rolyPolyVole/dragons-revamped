@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -53,12 +53,12 @@ public abstract class AreaEffectCloudMixin extends Entity {
             if (entity instanceof CrystalProtector.CrystalProtectorHorse) continue;
             if (entity instanceof CrystalProtector) continue;
 
-            if (entity instanceof EnderMan enderMan) {
-                double dx = enderMan.getX() - this.getX();
-                double dz = enderMan.getZ() - this.getZ();
+            if (entity instanceof Enderman enderman) {
+                double dx = enderman.getX() - this.getX();
+                double dz = enderman.getZ() - this.getZ();
                 if (dx * dx + dz * dz <= radius * radius) {
-                    enderMan.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 200, 1));
-                    enderMan.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 1));
+                    enderman.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 200, 1));
+                    enderman.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 1));
                 }
             } else {
                 filtered.add(entity);

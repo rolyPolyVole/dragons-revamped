@@ -29,10 +29,9 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,7 +47,7 @@ import java.util.List;
 public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Shadow
-    private EndDragonFight dragonFight;
+    private EnderDragonFight dragonFight;
     @Final @Shadow
     private EnderDragonPhaseManager phaseManager;
 
@@ -106,7 +105,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Unique
     private boolean finishedCooldown() {
-        boolean firstGeneration = dragonFight.saveData().needsStateScanning();
+        boolean firstGeneration = ((EnderDragonFightAccessor) dragonFight).dragonsrevamped$needsStateScanning();
         return !firstGeneration || tickCount > 15 * 20;
     }
 
@@ -122,13 +121,13 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Unique
     private long nearbyPlayerCount() {
-        Vec3 center = self().getFightOrigin().getCenter();
+        Vec3 center = Vec3.atCenterOf(self().getFightOrigin());
         return level().players().stream()
             .filter(p -> p.position().distanceToSqr(center) < 40000.0)
             .count();
     }
 
-    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EndDragonFight;updateDragon(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V", shift = At.Shift.BEFORE))
+    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EnderDragonFight;updateDragon(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V", shift = At.Shift.BEFORE))
     private void beforeUpdateDragon(CallbackInfo info) {
         if (getHealth() <= 1.0F) return;
         
@@ -274,9 +273,9 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return ticksSinceLastHurt > threshold ? getMaxHealth() * 0.01F : 1.0F + ((float) playerCount) * 0.1F;
     }
 
-    @Redirect(method = "aiStep()V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;hurtTime:I", opcode = Opcodes.GETFIELD), require = 1)
-    private int ignoreHurtTime(EnderDragon instance) {
-        return 0;
+    @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
+    private boolean ignoreHurtTime(EnderDragon instance) {
+        return false;
     }
 
     @Redirect(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;getFlySpeed()F"))
@@ -330,7 +329,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (dragonDeathTime != 0) return;
 
-        Vec3 center = self().getFightOrigin().getCenter();
+        Vec3 center = Vec3.atCenterOf(self().getFightOrigin());
         AABB area = AABB.ofSize(center, 400.0, 400.0, 400.0);
 
         for (CrystalProtector protector : serverLevel.getEntitiesOfClass(CrystalProtector.class, area)) {

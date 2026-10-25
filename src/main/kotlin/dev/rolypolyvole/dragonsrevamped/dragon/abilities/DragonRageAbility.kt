@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.Display
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase
@@ -229,7 +229,7 @@ class DragonRageAbility(
         if (this.stateTicks == 20) {
             respawnAllCrystals()
 
-            EntityType.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
+            EntityTypes.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
                 it.snapTo(dragon.x, dragon.y, dragon.z)
                 it.setVisualOnly(true)
                 this.level.addFreshEntity(it)
@@ -279,7 +279,7 @@ class DragonRageAbility(
                 sin(angle) * dist
             )
 
-            val display = Display.BlockDisplay(EntityType.BLOCK_DISPLAY, this.level)
+            val display = Display.BlockDisplay(EntityTypes.BLOCK_DISPLAY, this.level)
             display.addTag(RAGE_BLOCK_TAG)
             display.blockState = state
             display.setPos(startPos.x, startPos.y, startPos.z)
@@ -292,7 +292,7 @@ class DragonRageAbility(
     private fun cleanUpBlockDisplays() {
         val area = AABB.ofSize(this.center, 200.0, 200.0, 200.0)
         this.level.getEntitiesOfClass(Display.BlockDisplay::class.java, area)
-            .filter { RAGE_BLOCK_TAG in it.tags }
+            .filter { RAGE_BLOCK_TAG in it.entityTags() }
             .forEach { it.discard() }
     }
 
@@ -318,7 +318,7 @@ class DragonRageAbility(
 
             protectors.forEach { it.discard() }
 
-            val crystal = EntityType.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: continue
+            val crystal = EntityTypes.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: continue
             crystal.setPos(pos)
             crystal.setShowBottom(false)
             this.level.addFreshEntity(crystal)

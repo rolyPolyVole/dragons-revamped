@@ -4,7 +4,7 @@ import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.entity.player.Player
@@ -97,7 +97,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return dragon.fightOrigin.center.add(
+        return Vec3.atCenterOf(dragon.fightOrigin).add(
             random * 100.0 - 50.0,
             115.0 + random * 35.0,
             random * 100.0 - 50.0
@@ -112,7 +112,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private fun strikePlayer(player: Player) {
-        EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
+        EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(player.position())
             it.setVisualOnly(true)
             level.addFreshEntity(it)
@@ -123,7 +123,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private fun playEffect() {
-        EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
+        EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(dragon.position())
             it.setVisualOnly(true)
             level.addFreshEntity(it)

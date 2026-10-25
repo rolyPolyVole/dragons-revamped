@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.phys.Vec3
 
 class DragonAbilityManager(private val dragon: EnderDragon) {
     private val level = dragon.level() as ServerLevel
@@ -29,7 +30,7 @@ class DragonAbilityManager(private val dragon: EnderDragon) {
     }
 
     fun nearbyPlayers(): List<ServerPlayer> {
-        val center = dragon.fightOrigin.center
+        val center = Vec3.atCenterOf(dragon.fightOrigin)
         return level.players().filter { it.position().distanceToSqr(center) < 40000.0 }
     }
 

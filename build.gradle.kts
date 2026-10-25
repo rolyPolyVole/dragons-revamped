@@ -7,13 +7,10 @@ plugins {
     id("maven-publish")
 }
 
-version = ProcessBuilder("git", "describe", "--tags", "--always", "--dirty")
-    .directory(project.projectDir)
-    .start()
-    .inputStream
-    .bufferedReader()
-    .readText()
-    .trim()
+version = providers.exec {
+    commandLine("git", "describe", "--tags", "--always", "--dirty")
+    isIgnoreExitValue = true
+}.standardOutput.asText.get().trim().ifEmpty { "unknown" }
 
 group = project.property("maven_group") as String
 
@@ -56,18 +53,18 @@ tasks.test {
 }
 
 tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("minecraft_version", project.property("minecraft_version"))
-    inputs.property("loader_version", project.property("loader_version"))
+    val properties = mapOf(
+        "version" to project.version,
+        "minecraft_version" to project.property("minecraft_version"),
+        "loader_version" to project.property("loader_version"),
+        "kotlin_loader_version" to project.property("kotlin_loader_version")
+    )
+
+    inputs.properties(properties)
     filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand(
-            "version" to project.version,
-            "minecraft_version" to project.property("minecraft_version")!!,
-            "loader_version" to project.property("loader_version")!!,
-            "kotlin_loader_version" to project.property("kotlin_loader_version")!!
-        )
+        expand(properties)
     }
 }
 
@@ -81,7 +78,7 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 tasks.jar {
-    from("LICENSE") {
+    from("LICENSE.txt") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
 }

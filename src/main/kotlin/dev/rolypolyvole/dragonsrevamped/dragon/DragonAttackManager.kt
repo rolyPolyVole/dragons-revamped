@@ -15,7 +15,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         List(12) { ChargeAttack.ChargeAttackType },
         List(5) { FireballAttack.FireballAttackType },
         List(3) { LightningAttack.LightningAttackType },
-        List(4) { LowDiveAttack.LowDiveAttackType },
+        List(2) { LowDiveAttack.LowDiveAttackType },
         List(fighters.coerceAtMost(4)) { EnragedChargeAttack.EnragedChargeAttackType }
     ).flatten()
 

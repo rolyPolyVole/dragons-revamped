@@ -16,7 +16,7 @@ class DragonConfig(
     val crystalHealRate: Double = 1.0,
     val hyperHealRate: Double = 1.0,
     val crystalRespawnRate: Double = 1.0,
-    val initialCrystalDamage: Double = 52.0,
+    val initialCrystalDamage: Double = 50.0,
     val respawnedCrystalDamage: Double = 30.0,
     val maxCrystalProtectors: Int? = null,
     val crystalProtectorSpawnRate: Double = 1.0,

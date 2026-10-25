@@ -31,11 +31,15 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         )
 
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
-            return super.canStart(dragon, lastAttack) && lastAttack !is LowDiveAttack
+            return super.canStart(dragon, lastAttack) && lastAttack !is LowDiveAttack && groundedTargets(dragon).isNotEmpty()
         }
 
         override fun create(dragon: EnderDragon): AbstractDragonAttack {
             return LowDiveAttack(dragon)
+        }
+
+        fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> = dragon.nearbyPlayers().filter {
+            !it.isCreative && !it.isSpectator && it.isAlive && it.onGround()
         }
     }
 
@@ -47,14 +51,11 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     private var stage = Stage.DIVE
     private var stageTicks = 0
-    private var target: ServerPlayer? = null
     private var destination = Vec3.ZERO
     private var shouldEnd = false
 
     override fun start(): Boolean {
-        val player = dragon.nearbyPlayers().filter(::isValidTarget).randomOrNull() ?: return false
-
-        target = player
+        val player = LowDiveAttackType.groundedTargets(dragon).randomOrNull() ?: return false
         destination = hoverPointAbove(player)
 
         chargeTowards(destination)
@@ -86,18 +87,6 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun tickDive() {
-        val player = target
-
-        if (player == null || !isValidTarget(player)) {
-            shouldEnd = true
-            return
-        }
-
-        if (stageTicks % RETARGET_INTERVAL == 0) {
-            destination = hoverPointAbove(player)
-            chargeTowards(destination)
-        }
-
         if (dragon.position().distanceTo(destination) < ARRIVAL_DISTANCE || stageTicks > MAX_DIVE_TICKS) {
             stage = Stage.LINGER
             stageTicks = 0
@@ -169,15 +158,10 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private fun hoverPointAbove(player: ServerPlayer): Vec3 =
         Vec3(player.x, player.blockPosition().highestBlockY(level).y + HOVER_HEIGHT, player.z)
 
-    private fun isValidTarget(player: ServerPlayer): Boolean =
-        !player.isCreative && !player.isSpectator && player.isAlive && !player.hasDisconnected() &&
-            player.blockPosition().highestBlockY(level).y > level.minY
-
     private companion object {
         const val DIVE_SPEED = 0.9
         const val HOVER_HEIGHT = 8.0
         const val ARRIVAL_DISTANCE = 4.0
-        const val RETARGET_INTERVAL = 5
         const val MAX_DIVE_TICKS = 200
         const val LINGER_TICKS = 100
         const val MAX_VERTICAL_SPEED = 0.08

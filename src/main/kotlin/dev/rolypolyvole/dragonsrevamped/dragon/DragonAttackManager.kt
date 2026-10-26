@@ -6,7 +6,7 @@ import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.isOffside
-import dev.rolypolyvole.dragonsrevamped.util.turnTowards
+import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase
@@ -73,7 +73,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
 
     fun onBeforeMove() {
         if (returningToCenter) {
-            dragon.flyTowards(dragon.arenaCenter(RETURN_HEIGHT), 1.2)
+            dragon.flyTowards(dragon.arenaCenter(RETURN_HEIGHT), RETURN_SPEED * ModConfig.current.dragon.diveSpeedMultiplier)
             return
         }
 
@@ -92,12 +92,22 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         currentAttack?.let(::finishAttack)
         returningToCenter = true
 
-        dragon.phaseManager.setPhase(EnderDragonPhase.HOVERING)
+        chargeAtCenter()
+        dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.8F + Math.random().toFloat() * 0.3F)
+    }
+
+    private fun chargeAtCenter() {
+        val center = dragon.arenaCenter(RETURN_HEIGHT)
+
+        dragon.phaseManager.setPhase(EnderDragonPhase.CHARGING_PLAYER)
+        dragon.phaseManager.getPhase(EnderDragonPhase.CHARGING_PLAYER).setTarget(center)
     }
 
     private fun tickReturn() {
         val center = dragon.arenaCenter(RETURN_HEIGHT)
-        dragon.turnTowards(center, 10.0F)
+
+        if (dragon.phaseManager.currentPhase.phase != EnderDragonPhase.CHARGING_PLAYER) chargeAtCenter()
+        dragon.lookAt(EntityAnchorArgument.Anchor.FEET, dragon.position().add(dragon.position().subtract(center)))
 
         if (dragon.position().distanceTo(center) < RETURNED_DISTANCE) {
             returningToCenter = false
@@ -117,6 +127,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
 
     private companion object {
         const val RETURN_HEIGHT = 18.0
+        const val RETURN_SPEED = 1.8
         const val RETURNED_DISTANCE = 40.0
     }
 }

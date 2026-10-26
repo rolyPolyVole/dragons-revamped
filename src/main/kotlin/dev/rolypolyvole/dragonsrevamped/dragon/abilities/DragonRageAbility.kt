@@ -3,7 +3,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
-import dev.rolypolyvole.dragonsrevamped.dragon.SPEED_MULTIPLIER
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
@@ -61,12 +61,10 @@ class DragonRageAbility(
 
     override fun onBeforeMove() {
         if (state == State.ASCENDING) {
-            val direction = center.subtract(dragon.position())
-
-            dragon.deltaMovement = if (direction.length() > 2.0) {
-                direction.normalize().scale(1.6 * SPEED_MULTIPLIER)
+            if (center.distanceTo(dragon.position()) > 2.0) {
+                dragon.flyTowards(center, 1.6)
             } else {
-                Vec3.ZERO
+                dragon.deltaMovement = Vec3.ZERO
             }
         } else if (isActive()) {
             dragon.deltaMovement = Vec3.ZERO
@@ -285,7 +283,7 @@ class DragonRageAbility(
 
     private fun respawnAllCrystals() {
         val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }
-        val protectedSites = sites.take(ModConfig.current.fighters * 2)
+        val protectedSites = sites.take(ModConfig.current.fighters * ModConfig.current.rageProtectorsPerPlayer)
 
         for (site in sites) {
             val area = AABB.ofSize(site.position, 3.0, 3.0, 3.0)

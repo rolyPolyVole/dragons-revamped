@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
@@ -92,7 +93,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             }
         }
 
-        val speed = (if (resurfacing) 1.2 else 1.8) * chargeSpeedMultiplier
+        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.diveSpeedMultiplier) * chargeSpeedMultiplier
         dragon.flyTowards(targetLocation ?: return, speed)
     }
 

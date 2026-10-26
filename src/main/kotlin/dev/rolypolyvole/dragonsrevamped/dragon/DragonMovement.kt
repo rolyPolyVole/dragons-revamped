@@ -1,17 +1,16 @@
 package dev.rolypolyvole.dragonsrevamped.dragon
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.phys.Vec3
 import kotlin.math.atan2
 
-const val SPEED_MULTIPLIER = 0.8F
-
 private const val MAX_ARENA_DISTANCE = 150.0
 private const val MIN_HEIGHT_ABOVE_ORIGIN = 40.0
 
 fun EnderDragon.flyTowards(target: Vec3, speed: Double) {
-    deltaMovement = target.subtract(position()).normalize().scale(speed * SPEED_MULTIPLIER)
+    deltaMovement = target.subtract(position()).normalize().scale(speed * ModConfig.current.dragonSpeedMultiplier)
 }
 
 fun EnderDragon.turnTowards(target: Vec3, maxStep: Float) {

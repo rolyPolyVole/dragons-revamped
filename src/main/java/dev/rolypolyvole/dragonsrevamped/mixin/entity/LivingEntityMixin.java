@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,8 +20,6 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class LivingEntityMixin {
 
     @Unique
-    private static final float BODY_HIT_ENCHANTMENT_EFFECTIVENESS = 0.5F;
-    @Unique
     private static final float DRAGON_DURABILITY_DAMAGE = 0.5F;
 
     @WrapWithCondition(method = "stabAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
@@ -30,7 +29,7 @@ public abstract class LivingEntityMixin {
 
     @ModifyExpressionValue(method = "getDamageAfterMagicAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getDamageProtection(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
     private float weakenProtectionAgainstBodyHits(float protection, @Local(argsOnly = true) DamageSource source) {
-        return source.is(DragonDamageTypes.DRAGON_BODY_HIT) ? protection * BODY_HIT_ENCHANTMENT_EFFECTIVENESS : protection;
+        return source.is(DragonDamageTypes.DRAGON_BODY_HIT) ? protection * (float) ModConfig.getCurrent().getBodyHitProtectionEffectiveness() : protection;
     }
 
     @WrapOperation(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))

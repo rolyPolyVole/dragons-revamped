@@ -8,7 +8,6 @@ import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals;
-import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.dragon.abilities.DragonRageAbility;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
@@ -112,7 +111,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @Unique
     private boolean finishedCooldown() {
         boolean firstFight = dragonFight != null && !dragonFight.hasPreviouslyKilledDragon();
-        return !firstFight || tickCount > 15 * 20;
+        return !firstFight || tickCount > ModConfig.getCurrent().getGracePeriodSeconds() * 20;
     }
 
     @Unique
@@ -241,7 +240,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         }
 
         if (ModConfig.getCurrent().getLimitMaxDamagePerHit()) {
-            damage = Math.min(damage, getMaxHealth() * 0.25F);
+            damage = Math.min(damage, getMaxHealth() * (float) ModConfig.getCurrent().getMaxDamagePerHitFraction());
         }
 
         return damage;
@@ -285,9 +284,9 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         float speed = Math.max(1.0F, original.call(instance));
 
         if (instance.getPhase() == EnderDragonPhase.CHARGING_PLAYER) {
-            return speed * 2.4F * DragonMovementKt.SPEED_MULTIPLIER;
+            return speed * 2.4F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier();
         } else {
-            return speed * 1.7F * DragonMovementKt.SPEED_MULTIPLIER;
+            return speed * 1.7F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier();
         }
     }
 
@@ -298,7 +297,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @ModifyConstant(method = "aiStep()V", constant = @Constant(floatValue = 0.06F))
     private float forwardMovement(float original) {
-        return original * 1.7F * DragonMovementKt.SPEED_MULTIPLIER * attackManager.getSpeedMultiplier();
+        return original * 1.7F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier() * attackManager.getSpeedMultiplier();
     }
 
     @WrapOperation(method = "checkWalls", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))

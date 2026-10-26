@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.mixin.entity;
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,7 +20,7 @@ public abstract class ThrownEnderpearlMixin extends Entity {
     @ModifyConstant(method = "onHit", constant = @Constant(floatValue = 0.05F))
     private float increaseEndermiteSpawnChance(float original) {
         if (level() instanceof ServerLevel serverLevel && !serverLevel.getDragons().isEmpty()) {
-            return 0.5F;
+            return (float) ModConfig.getCurrent().getEndermiteSpawnChance();
         }
 
         return original;

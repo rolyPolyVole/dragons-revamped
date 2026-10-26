@@ -190,8 +190,8 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         const val MAX_VERTICAL_SPEED = 0.08
 
         const val PARTICLES_PER_TICK = 50
-        const val POUR_WIDTH = 2.6
-        const val SPREAD_SPEED = 0.25
+        const val POUR_WIDTH = 1.2
+        const val SPREAD_SPEED = 0.12
         const val FALL_SPEED = 0.55
         const val FALL_SPEED_VARIATION = 0.35
 

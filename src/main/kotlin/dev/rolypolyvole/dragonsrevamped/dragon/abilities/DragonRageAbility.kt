@@ -212,7 +212,7 @@ class DragonRageAbility(
         }
 
         if (stateTicks == 20) {
-            respawnAllCrystals()
+            respawnCrystals()
 
             EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
                 it.snapTo(dragon.x, dragon.y, dragon.z)
@@ -278,9 +278,10 @@ class DragonRageAbility(
             .forEach { it.discard() }
     }
 
-    private fun respawnAllCrystals() {
-        val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }
-        val protectedSites = sites.take(ModConfig.current.crystalProtectors.amountOnCrystals)
+    private fun respawnCrystals() {
+        val config = ModConfig.current
+        val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }.take(BASE_RESPAWNED_CRYSTALS + config.fighters)
+        val protectedSites = sites.take(config.crystalProtectors.amountOnCrystals)
 
         for (site in sites) {
             val area = AABB.ofSize(site.position, 3.0, 3.0, 3.0)
@@ -306,6 +307,7 @@ class DragonRageAbility(
         private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
         private const val RAGED_TAG = "dragons_revamped_raged"
         private const val HEALTH_CAP_FRACTION = 0.5F
+        private const val BASE_RESPAWNED_CRYSTALS = 3
 
         @JvmStatic
         fun hasRaged(dragon: EnderDragon): Boolean = RAGED_TAG in dragon.entityTags()

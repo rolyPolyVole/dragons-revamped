@@ -1,8 +1,8 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,21 +10,18 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.monster.skeleton.Skeleton;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
 @Mixin(EndCrystal.class)
-@SuppressWarnings("NameDoesntMatchTargetClass")
 public abstract class EndCrystalMixin {
 
     @Unique
@@ -32,8 +29,8 @@ public abstract class EndCrystalMixin {
         return (EndCrystal)(Object) this;
     }
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/BaseFireBlock;getState(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
-    private BlockState useSoulFire(BlockGetter blockGetter, BlockPos blockPos) {
+    @ModifyExpressionValue(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/BaseFireBlock;getState(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;"))
+    private BlockState useSoulFire(BlockState original) {
         return Blocks.SOUL_FIRE.defaultBlockState();
     }
 

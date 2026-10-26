@@ -1,15 +1,20 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
-import net.minecraft.core.BlockPos
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import kotlin.math.sqrt
 
 class HunterSpawnAbility(
@@ -17,56 +22,63 @@ class HunterSpawnAbility(
     manager: DragonAbilityManager
 ) : AbstractDragonAbility(dragon, manager) {
 
-    private val level = this.dragon.level() as ServerLevel
+    private val level = dragon.level() as ServerLevel
 
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = this.manager.nearbyPlayers().size.coerceAtLeast(1)
+        val config = ModConfig.current
 
         val base = (1200..1500).random()
-        val scaled = (1200 / sqrt(playerCount.toDouble())).toInt()
+        val scaled = 1200 / sqrt(config.fighters.toDouble())
 
-        return base + scaled
+        return ((base + scaled) / config.crystalProtectorSpawnRate).toInt()
     }
 
     override fun tick() {
-        if (this.cooldown > 0) {
-            this.cooldown--
+        if (cooldown > 0) {
+            cooldown--
         } else {
-            spawnHunter()
-            this.cooldown = calculateCooldown()
+            if (aliveHunters() < ModConfig.current.crystalProtectorLimit) spawnHunter()
+            cooldown = calculateCooldown()
         }
+    }
+
+    private fun aliveHunters(): Int {
+        val area = AABB.ofSize(Vec3.atCenterOf(dragon.fightOrigin), 400.0, 400.0, 400.0)
+        return level.getEntitiesOfClass(CrystalProtector::class.java, area).count { it.isHunter && it.isAlive }
     }
 
     private fun spawnHunter() {
-        val offsetX = ((-40..40).random()).toDouble()
-        val offsetZ = ((-40..40).random()).toDouble()
-        val spawnX = this.dragon.fightOrigin.x + offsetX
-        val spawnZ = this.dragon.fightOrigin.z + offsetZ
-        val groundY = BlockPos(spawnX.toInt(), 0, spawnZ.toInt()).highestBlockY(this.level).y.toDouble()
+        val column = dragon.fightOrigin.offset((-40..40).random(), 0, (-40..40).random())
+        val spawnPos = Vec3.atBottomCenterOf(column.highestBlockY(level))
 
-        CrystalProtector(this.level).let {
-            it.setPos(spawnX, groundY, spawnZ)
-            it.spawnWithMount(this.level)
+        CrystalProtector(level).let {
+            it.setPos(spawnPos)
+            it.spawnWithMount(level)
+            it.target = highestPlayer()
         }
 
-        EntityType.LIGHTNING_BOLT.create(this.level, EntitySpawnReason.MOB_SUMMONED)?.let {
-            it.snapTo(spawnX, groundY, spawnZ, 0f, 0f)
+        EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
+            it.snapTo(spawnPos)
             it.setVisualOnly(true)
-            this.level.addFreshEntity(it)
+            level.addFreshEntity(it)
         }
 
-        this.manager.sendParticles(
+        manager.sendParticles(
             ParticleTypes.EXPLOSION_EMITTER,
-            spawnX, groundY + 1.0, spawnZ,
+            spawnPos.x, spawnPos.y + 1.0, spawnPos.z,
             1
         )
 
-        this.manager.broadcastMessage(
+        dragon.broadcastMessage(
             Component.literal("A Crystal Protector joins the battle!").withColor(0xAA00AA)
         )
 
-        this.manager.crystalRespawnAbility.sendCrystalCount()
+        manager.crystalRespawnAbility.sendCrystalCount()
     }
+
+    private fun highestPlayer(): ServerPlayer? = dragon.nearbyPlayers()
+        .filter { !it.isCreative && !it.isSpectator && it.isAlive }
+        .maxByOrNull { it.y }
 }

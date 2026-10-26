@@ -1,5 +1,9 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.xz
 import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.server.level.ServerPlayer
@@ -35,10 +39,10 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var resurfacing = false
     private var shouldEnd = false
 
-    var speedMultiplier: Double = 1.0
+    var chargeSpeedMultiplier: Double = 1.0
 
     override fun tick() {
-        this.ticks++
+        ticks++
 
         if (targetLocation != null) {
             val vector = targetLocation!!.subtract(dragon.position()).reverse()
@@ -47,24 +51,28 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun beforeMove() {
-        if (!resurfacing && target == null || target!!.hasDisconnected()) run { this.shouldEnd = true; return }
+        val target = this.target
+
+        if (target == null || target.hasDisconnected()) {
+            shouldEnd = true
+            return
+        }
+
         if (ticks < 20) return
 
         if (ticks == 20) {
-            this.targetLocation = this.getTargetLocation()
-            this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+            targetLocation = getTargetLocation()
+            direction = targetLocation!!.subtract(dragon.position()).normalize()
         }
 
-        if (!resurfacing && ticks > 20 && ticks % 5 == 0) {
-            val player = target ?: return
-            if (!player.hasDisconnected() && player.isAlive) {
-                val newTarget = getTargetLocation()
-                if (newTarget.distanceToSqr(targetLocation!!) < 100.0) {
-                    this.targetLocation = newTarget
-                    this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+        if (!resurfacing && ticks > 20 && ticks % 5 == 0 && target.isAlive) {
+            val newTarget = getTargetLocation()
 
-                    chargeTowards(targetLocation!!)
-                }
+            if (newTarget.distanceToSqr(targetLocation!!) < 100.0) {
+                targetLocation = newTarget
+                direction = targetLocation!!.subtract(dragon.position()).normalize()
+
+                chargeTowards(targetLocation!!)
             }
         }
 
@@ -74,22 +82,19 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             val remaining = currentTarget.subtract(dragon.position())
 
             if (remaining.dot(currentDirection) <= 0 || dragon.position().distanceTo(currentTarget) < 5.0) {
-                this.resurfacing = true
+                resurfacing = true
 
                 val horizontal = currentDirection.multiply(1.0, 0.0, 1.0).normalize()
                 val newDirection = Vec3(horizontal.x, 1.0, horizontal.z).normalize()
 
-                this.targetLocation = dragon.position().add(newDirection.scale(50.0))
+                targetLocation = dragon.position().add(newDirection.scale(50.0))
 
                 chargeTowards(targetLocation!!)
             }
         }
 
-        val to = (targetLocation ?: return).subtract(dragon.position())
-        val movement = to.normalize()
-        val speed = (if (resurfacing) 1.2 else 1.8) * speedMultiplier
-
-        dragon.deltaMovement = movement.scale(speed)
+        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.diveSpeedMultiplier) * chargeSpeedMultiplier
+        dragon.flyTowards(targetLocation ?: return, speed)
     }
 
     override fun getTurnSpeedMultiplier(): Float {
@@ -103,15 +108,15 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun start(): Boolean {
-        this.target = nearbyPlayers()
+        target = dragon.nearbyPlayers()
             .filter(::isTargetValid)
             .randomOrNull()
-            ?: run { this.shouldEnd = true; return false }
+            ?: run { shouldEnd = true; return false }
 
-        this.targetLocation = this.getTargetLocation()
+        targetLocation = getTargetLocation()
 
         chargeTowards(targetLocation!!)
-        broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
 
         return true
     }

@@ -1,0 +1,207 @@
+package dev.rolypolyvole.dragonsrevamped.dragon.attacks
+
+import dev.rolypolyvole.dragonsrevamped.DragonsRevamped
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import net.minecraft.core.BlockPos
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.particles.PowerParticleOption
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.effect.MobEffectInstance
+import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.AreaEffectCloud
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.entity.boss.enderdragon.phases.*
+import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.phys.Vec3
+import kotlin.reflect.KClass
+
+class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
+
+    object LowDiveAttackType : DragonAttackType {
+        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
+            DragonChargePlayerPhase::class,
+            DragonLandingApproachPhase::class,
+            DragonLandingPhase::class,
+            DragonDeathPhase::class,
+            AbstractDragonSittingPhase::class
+        )
+
+        override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
+            return super.canStart(dragon, lastAttack) && lastAttack !is LowDiveAttack && groundedTargets(dragon).isNotEmpty()
+        }
+
+        override fun create(dragon: EnderDragon): AbstractDragonAttack {
+            return LowDiveAttack(dragon)
+        }
+
+        fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {
+            val origin = dragon.fightOrigin
+            val podiumY = dragon.level().getHeight(Heightmap.Types.MOTION_BLOCKING, origin.x, origin.z)
+
+            return dragon.nearbyPlayers().filter {
+                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y <= podiumY + MAX_HEIGHT_ABOVE_PODIUM
+            }
+        }
+
+        private const val MAX_HEIGHT_ABOVE_PODIUM = 12
+    }
+
+    private enum class Stage {
+        DIVE, LINGER
+    }
+
+    private val breath = PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1.0F)
+
+    private var stage = Stage.DIVE
+    private var stageTicks = 0
+    private var target: ServerPlayer? = null
+    private var destination = Vec3.ZERO
+    private var shouldEnd = false
+    private var lastCloudPosition: Vec3? = null
+
+    override fun start(): Boolean {
+        val player = LowDiveAttackType.groundedTargets(dragon).randomOrNull() ?: return false
+        target = player
+        destination = hoverPointAbove(player)
+
+        chargeTowards(destination)
+        dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 2.0F, 0.7F + random * 0.2F)
+
+        return true
+    }
+
+    override fun tick() {
+        stageTicks++
+
+        when (stage) {
+            Stage.DIVE -> tickDive()
+            Stage.LINGER -> tickLinger()
+        }
+    }
+
+    override fun beforeMove() {
+        when (stage) {
+            Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.diveSpeedMultiplier)
+            Stage.LINGER -> limitClimbRate()
+        }
+    }
+
+    override fun end() {
+        if (stage == Stage.DIVE) restoreNormalPhase()
+    }
+
+    override fun shouldEnd(): Boolean = shouldEnd
+
+    override fun getSpeedMultiplier(): Float = if (stage == Stage.LINGER) LINGER_SPEED else 1.0F
+
+    override fun allowsRoaring(): Boolean = stage != Stage.LINGER
+
+    private fun tickDive() {
+        if (dragon.position().distanceTo(destination) < ARRIVAL_DISTANCE || stageTicks > MAX_DIVE_TICKS) {
+            stage = Stage.LINGER
+            stageTicks = 0
+            restoreNormalPhase()
+
+            target?.let { DragonsRevamped.LOGGER.info("Low dive breath started; target {} is at y={}", it.scoreboardName, it.y) }
+        }
+    }
+
+    private fun tickLinger() {
+        val phase = dragon.phaseManager.currentPhase
+
+        if (stageTicks >= LINGER_TICKS || phase.isSitting || phase is DragonLandingApproachPhase || phase is DragonLandingPhase) {
+            shouldEnd = true
+            return
+        }
+
+        pourBreath()
+
+        if (stageTicks >= CLOUD_DELAY) {
+            spawnBreathCloud()
+        }
+    }
+
+    private fun limitClimbRate() {
+        val movement = dragon.deltaMovement
+        dragon.deltaMovement = Vec3(movement.x, movement.y.coerceIn(-MAX_VERTICAL_SPEED, MAX_VERTICAL_SPEED), movement.z)
+    }
+
+    private fun pourBreath() {
+        val mouth = mouthPosition()
+
+        if (stageTicks == 1) {
+            level.playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.HOSTILE, 4.0F, 0.6F + random * 0.2F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 4.0F, 0.7F)
+        }
+
+        repeat(PARTICLES_PER_TICK) {
+            level.sendParticles(
+                breath, true, true,
+                mouth.x + (random - 0.5) * POUR_WIDTH,
+                mouth.y + (random - 0.5) * POUR_WIDTH,
+                mouth.z + (random - 0.5) * POUR_WIDTH,
+                0,
+                (random - 0.5) * SPREAD_SPEED,
+                -(FALL_SPEED + random * FALL_SPEED_VARIATION),
+                (random - 0.5) * SPREAD_SPEED,
+                1.0
+            )
+        }
+    }
+
+    private fun spawnBreathCloud() {
+        val mouth = mouthPosition()
+        val groundY = BlockPos.containing(mouth).highestBlockY(level).y
+        if (groundY <= level.minY) return
+
+        val landing = Vec3(mouth.x, groundY.toDouble(), mouth.z)
+        if (lastCloudPosition?.let { it.distanceTo(landing) < CLOUD_SPACING } == true) return
+        lastCloudPosition = landing
+
+        AreaEffectCloud(level, mouth.x, groundY.toDouble(), mouth.z).apply {
+            owner = dragon
+            setCustomParticle(breath)
+            radius = 6.0F
+            duration = 120
+            radiusPerTick = (8.0F - radius) / duration
+            setPotionDurationScale(0.25F)
+            addEffect(MobEffectInstance(MobEffects.INSTANT_DAMAGE, 1, 1))
+            level.addFreshEntity(this)
+        }
+    }
+
+    private fun mouthPosition(): Vec3 {
+        val head = Vec3(dragon.head.x, dragon.head.getY(0.8), dragon.head.z)
+        val forward = head.subtract(dragon.position()).multiply(1.0, 0.0, 1.0).normalize()
+        return head.subtract(forward.scale(MOUTH_OFFSET))
+    }
+
+    private fun hoverPointAbove(player: ServerPlayer): Vec3 =
+        Vec3(player.x, player.blockPosition().highestBlockY(level).y + HOVER_HEIGHT, player.z)
+
+    private companion object {
+        const val DIVE_SPEED = 1.3
+        const val HOVER_HEIGHT = 5.0
+        const val ARRIVAL_DISTANCE = 4.0
+        const val MAX_DIVE_TICKS = 200
+        const val LINGER_TICKS = 100
+        const val LINGER_SPEED = 0.5F
+        const val MAX_VERTICAL_SPEED = 0.08
+
+        const val PARTICLES_PER_TICK = 50
+        const val MOUTH_OFFSET = 1.5
+        const val POUR_WIDTH = 1.2
+        const val SPREAD_SPEED = 0.12
+        const val FALL_SPEED = 0.55
+        const val FALL_SPEED_VARIATION = 0.35
+
+        const val CLOUD_SPACING = 8.0
+        const val CLOUD_DELAY = 12
+    }
+}

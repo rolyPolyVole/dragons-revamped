@@ -3,9 +3,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.entities
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.monster.Endermite
@@ -31,6 +29,10 @@ class WitherArrow(
     override fun tick() {
         super.tick()
 
+        if (deltaMovement.length() > MAX_SPEED) {
+            deltaMovement = deltaMovement.normalize().scale(MAX_SPEED)
+        }
+
         if (isInGround) return
 
         val level = level() as? ServerLevel ?: return
@@ -44,16 +46,12 @@ class WitherArrow(
         )
     }
 
-    override fun doPostHurtEffects(target: LivingEntity) {
-        super.doPostHurtEffects(target)
-
-        if (Math.random() < 0.2) {
-            target.addEffect(MobEffectInstance(MobEffects.DARKNESS, 85, 0))
-        }
+    companion object {
+        const val MAX_SPEED = 3.0
     }
 }
 
-class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(EntityType.ENDERMITE, level) {
+class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(EntityTypes.ENDERMITE, level) {
 
     init {
         getAttribute(Attributes.MOVEMENT_SPEED)!!.baseValue = 0.3
@@ -69,9 +67,9 @@ class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(Enti
     override fun canBeHitByProjectile(): Boolean = false
 
     override fun tick() {
-        this.noPhysics = arrow.isAlive && arrow.deltaMovement.lengthSqr() != 0.0
+        noPhysics = arrow.isAlive && arrow.deltaMovement.lengthSqr() != 0.0
 
-        if (noPhysics) this.deltaMovement = arrow.deltaMovement.normalize()
+        if (noPhysics) deltaMovement = arrow.deltaMovement.normalize()
         else stopRiding()
 
         super.tick()

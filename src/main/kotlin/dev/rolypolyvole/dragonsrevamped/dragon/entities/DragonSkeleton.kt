@@ -2,7 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.entities
 
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.goal.SpearUseGoal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
@@ -15,12 +15,12 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
+open class DragonSkeleton(level: Level) : Skeleton(EntityTypes.SKELETON, level) {
 
     override fun shouldBeSaved(): Boolean = false
 
     override fun tick() {
-        this.noPhysics = vehicle?.noPhysics ?: false
+        noPhysics = vehicle?.noPhysics ?: false
 
         super.tick()
     }
@@ -28,13 +28,13 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
     override fun aiStep() {
         super.aiStep()
 
-        if (this.vehicle == null) return
+        if (vehicle == null) return
 
         val target = this.target ?: return
         lookAt(target, 360f, 360f)
 
-        this.yBodyRot = this.yRot
-        this.yHeadRot = this.yRot
+        yBodyRot = yRot
+        yHeadRot = yRot
     }
 
     override fun registerGoals() {
@@ -50,26 +50,25 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
 
     override fun performRangedAttack(target: LivingEntity, pullProgress: Float) {
         val hand = ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)
-        val bow = this.getItemInHand(hand)
+        val bow = getItemInHand(hand)
         val arrowItem = ItemStack(Items.ARROW)
 
-        val arrow = WitherArrow(this.level(), this, arrowItem, bow)
+        val arrow = WitherArrow(level(), this, arrowItem, bow)
 
-        val dx = target.x - this.x
+        val dx = target.x - x
         val dy = target.eyeY - arrow.y
-        val dz = target.z - this.z
+        val dz = target.z - z
 
-        val level = this.level()
+        val level = level()
         if (level is ServerLevel) {
-            arrow.deltaMovement = computeExactVelocity(dx, dy, dz, 3.0)
+            arrow.deltaMovement = computeExactVelocity(dx, dy, dz)
             level.addFreshEntity(arrow)
         }
 
-        this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F))
+        playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 0.8F))
     }
 
-    @Suppress("SameParameterValue")
-    private fun computeExactVelocity(dx: Double, dy: Double, dz: Double, maxSpeed: Double): Vec3 {
+    private fun computeExactVelocity(dx: Double, dy: Double, dz: Double): Vec3 {
         val drag = 0.99
         val gravity = 0.05
 
@@ -79,12 +78,11 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityType.SKELETON, level) {
             val vz = dz / s
             val vy = (dy + gravity / (1.0 - drag) * (n - s)) / s
             val v = sqrt(vx * vx + vy * vy + vz * vz)
-            if (v <= maxSpeed) {
+            if (v <= WitherArrow.MAX_SPEED) {
                 return Vec3(vx, vy, vz)
             }
         }
 
-        val s = (1.0 - drag.pow(1)) / (1.0 - drag)
-        return Vec3(dx / s, (dy + gravity / (1.0 - drag) * (1 - s)) / s, dz / s)
+        return Vec3(dx, dy, dz).normalize().scale(WitherArrow.MAX_SPEED)
     }
 }

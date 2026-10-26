@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.accessor;
 
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import org.spongepowered.asm.mixin.Mixin;

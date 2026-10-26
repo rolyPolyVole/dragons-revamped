@@ -1,10 +1,15 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import dev.rolypolyvole.dragonsrevamped.util.sendSound
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.entity.player.Player
@@ -12,6 +17,10 @@ import net.minecraft.world.phys.Vec3
 import kotlin.reflect.KClass
 
 class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
+
+    private companion object {
+        const val STRIKE_INTERVAL = 30
+    }
 
     object LightningAttackType : DragonAttackType {
         override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
@@ -34,29 +43,35 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var reachedOutpost = false
 
     private var ticks = 0
+    private var elapsedTicks = 0
     private var shouldEnd: Boolean = false
 
     override fun tick() {
-        if (!reachedOutpost) return
-
-        if (this.ticks++ == 0) {
-            hover()
-            broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+        if (elapsedTicks++ % STRIKE_INTERVAL == 0) {
+            strikeDragon()
         }
 
-        nearbyPlayers().filter(::isPlayerExposed).forEach {
-            playSound(it, SoundEvents.FLINTANDSTEEL_USE, pitch = 2.0F)
+        if (!reachedOutpost) return
+
+        if (ticks++ == 0) {
+            hover()
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
+        }
+
+        dragon.nearbyPlayers().filter(::isPlayerExposed).forEach {
+            it.sendSound(SoundEvents.FLINTANDSTEEL_USE, pitch = 2.0F)
         }
 
         if (ticks < 50) return
 
-        playEffect()
+        strikeDragon()
+        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
 
-        nearbyPlayers()
+        dragon.nearbyPlayers()
             .filter(::isPlayerExposed)
             .forEach(::strikePlayer)
 
-        this.shouldEnd = true
+        shouldEnd = true
     }
 
     override fun beforeMove() {
@@ -65,24 +80,20 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return
         }
 
-        val delta = outpost.subtract(dragon.position())
-
-        if (delta.lengthSqr() < 256.0) {
-            this.reachedOutpost = true
+        if (outpost.distanceToSqr(dragon.position()) < 256.0) {
+            reachedOutpost = true
             dragon.deltaMovement = Vec3.ZERO
             return
         }
 
-        val speed = 1.0
-        val direction = delta.normalize()
-        dragon.deltaMovement = direction.scale(speed)
+        dragon.flyTowards(outpost, 1.0)
     }
 
     override fun start(): Boolean {
-        this.outpost = this.getOutpostLocation()
+        outpost = getOutpostLocation()
 
         chargeTowards(outpost)
-        broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
+        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
 
         return true
     }
@@ -91,13 +102,10 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         restoreNormalPhase()
     }
 
-    override fun getSpeedMultiplier(): Float = 1.0f
-    override fun getTurnSpeedMultiplier(): Float = 1.0f
-
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return dragon.fightOrigin.center.add(
+        return Vec3.atCenterOf(dragon.fightOrigin).add(
             random * 100.0 - 50.0,
             115.0 + random * 35.0,
             random * 100.0 - 50.0
@@ -105,6 +113,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private fun isPlayerExposed(player: Player): Boolean {
+        if (player.isCreative || player.isSpectator || !player.isAlive) return false
+
         val blockY = player.blockPosition().highestBlockY(level).y
         val playerY = player.blockPosition().y
 
@@ -112,23 +122,22 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     private fun strikePlayer(player: Player) {
-        EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
+        EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(player.position())
             it.setVisualOnly(true)
             level.addFreshEntity(it)
         }
 
         val source = DragonDamageTypes.dragonLightning(level, dragon)
-        player.hurtServer(level, source, 11.5f)
+        val damage = ModConfig.current.damage.lightning.forDifficulty(level.difficulty)
+        player.hurtServer(level, source, damage)
     }
 
-    private fun playEffect() {
-        EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
+    private fun strikeDragon() {
+        EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(dragon.position())
             it.setVisualOnly(true)
             level.addFreshEntity(it)
         }
-
-        broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
     }
 }

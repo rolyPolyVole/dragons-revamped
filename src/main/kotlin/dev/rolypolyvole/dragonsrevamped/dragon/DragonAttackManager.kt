@@ -86,7 +86,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
 
         lastAttack = attack
         currentAttack = null
-        ticksUntilNextAttack = ((80..200).random() / sqrt(fighters.toDouble())).toInt()
+        ticksUntilNextAttack = ((160..240).random() / sqrt(fighters.toDouble())).toInt().coerceAtLeast(MIN_ATTACK_GAP)
     }
 
     private fun shouldReturnToCenter(): Boolean =
@@ -133,5 +133,6 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         const val RETURN_HEIGHT = 18.0
         const val RETURN_SPEED = 1.8
         const val RETURNED_DISTANCE = 40.0
+        const val MIN_ATTACK_GAP = 100
     }
 }

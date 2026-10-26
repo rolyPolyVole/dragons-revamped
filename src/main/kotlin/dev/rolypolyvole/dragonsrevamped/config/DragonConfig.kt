@@ -29,8 +29,8 @@ class DragonConfig(
 }
 
 class DamageConfig(
-    val headContact: DifficultyDamage = DifficultyDamage(8.0F, 14.0F, 21.0F),
-    val wingContact: DifficultyDamage = DifficultyDamage(5.0F, 8.0F, 12.0F),
+    val headContact: DifficultyDamage = DifficultyDamage(9.0F, 16.0F, 24.0F),
+    val wingContact: DifficultyDamage = DifficultyDamage(6.5F, 11.0F, 16.5F),
     val lightning: DifficultyDamage = DifficultyDamage(6.75F, 11.5F, 17.25F)
 )
 

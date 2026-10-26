@@ -3,8 +3,6 @@ package dev.rolypolyvole.dragonsrevamped.dragon.entities
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -42,14 +40,6 @@ class WitherArrow(
             0.0, 0.0, 0.0,
             0.0
         )
-    }
-
-    override fun doPostHurtEffects(target: LivingEntity) {
-        super.doPostHurtEffects(target)
-
-        if (Math.random() < 0.2) {
-            target.addEffect(MobEffectInstance(MobEffects.DARKNESS, 85, 0))
-        }
     }
 }
 

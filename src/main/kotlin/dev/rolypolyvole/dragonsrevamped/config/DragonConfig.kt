@@ -6,6 +6,7 @@ import kotlin.math.sqrt
 class DragonConfig(
     val playerCount: Int = 1,
     val healthOverride: Double? = null,
+    val maxCrystalProtectors: Int? = null,
     val disableFog: Boolean = true,
     val limitMaxDamagePerHit: Boolean = true,
     val dragonBreathErodesItems: Boolean = true,
@@ -22,6 +23,9 @@ class DragonConfig(
 
     val maxHealth: Double
         get() = healthOverride ?: (800.0 + 700.0 * sqrt(fighters - 1.0))
+
+    val crystalProtectorLimit: Int
+        get() = maxCrystalProtectors ?: fighters
 }
 
 class DamageConfig(

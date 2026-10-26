@@ -5,12 +5,15 @@ import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
+import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import kotlin.math.sqrt
 
@@ -36,9 +39,14 @@ class HunterSpawnAbility(
         if (cooldown > 0) {
             cooldown--
         } else {
-            spawnHunter()
+            if (aliveHunters() < ModConfig.current.crystalProtectorLimit) spawnHunter()
             cooldown = calculateCooldown()
         }
+    }
+
+    private fun aliveHunters(): Int {
+        val area = AABB.ofSize(Vec3.atCenterOf(dragon.fightOrigin), 400.0, 400.0, 400.0)
+        return level.getEntitiesOfClass(CrystalProtector::class.java, area).count { it.isHunter && it.isAlive }
     }
 
     private fun spawnHunter() {
@@ -48,6 +56,7 @@ class HunterSpawnAbility(
         CrystalProtector(level).let {
             it.setPos(spawnPos)
             it.spawnWithMount(level)
+            it.target = highestPlayer()
         }
 
         EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
@@ -68,4 +77,8 @@ class HunterSpawnAbility(
 
         manager.crystalRespawnAbility.sendCrystalCount()
     }
+
+    private fun highestPlayer(): ServerPlayer? = dragon.nearbyPlayers()
+        .filter { !it.isCreative && !it.isSpectator && it.isAlive }
+        .maxByOrNull { it.y }
 }

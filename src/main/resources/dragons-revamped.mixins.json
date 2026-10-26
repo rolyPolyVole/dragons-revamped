@@ -15,6 +15,7 @@
         "dragon.EnderDragonMixin",
         "entity.AreaEffectCloudMixin",
         "entity.EndermanMixin",
+        "entity.LivingEntityMixin",
         "entity.ServerPlayerMixin",
         "entity.ThrownEnderpearlMixin",
         "worldgen.EndSpikeFeatureMixin",

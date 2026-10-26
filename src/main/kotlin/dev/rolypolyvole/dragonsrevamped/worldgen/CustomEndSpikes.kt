@@ -12,8 +12,13 @@ import net.minecraft.world.phys.Vec3
 object CustomEndSpikes {
     private const val ARENA_CHUNK_RADIUS = 8
 
-    fun getCrystalLocations(level: ServerLevel): List<Vec3> =
-        EndSpikeFeature.getSpikesForLevel(level).map { Vec3(it.centerX + 0.5, it.height.toDouble(), it.centerZ + 0.5) }
+    fun getCrystalLocations(level: ServerLevel): List<Vec3> = getCrystalSites(level).map { it.position }
+
+    fun getCrystalSites(level: ServerLevel): List<CrystalSite> = EndSpikeFeature.getSpikesForLevel(level).map {
+        CrystalSite(Vec3(it.centerX + 0.5, it.height.toDouble(), it.centerZ + 0.5), it.isGuarded)
+    }
+
+    class CrystalSite(val position: Vec3, val guarded: Boolean)
 
     @JvmStatic
     fun place(level: ServerLevelAccessor, feature: EndSpikeFeature, spike: EndSpikeFeature.EndSpike) {
@@ -23,7 +28,7 @@ object CustomEndSpikes {
     }
 
     fun placeInitialSpikes(end: ServerLevel) {
-        val fight = end.dragonFight as EnderDragonFightAccessor? ?: return
+        val fight = end.dragonFight as? EnderDragonFightAccessor? ?: return
         if (!fight.needsStateScanning()) return
 
         for (x in -ARENA_CHUNK_RADIUS..ARENA_CHUNK_RADIUS) {

@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.SPEED_MULTIPLIER
@@ -282,13 +283,17 @@ class DragonRageAbility(
     }
 
     private fun respawnAllCrystals() {
-        for (pos in CustomEndSpikes.getCrystalLocations(level)) {
-            val area = AABB.ofSize(pos, 3.0, 3.0, 3.0)
+        val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }
+        val protectedSites = sites.take(ModConfig.current.fighters * 2)
+
+        for (site in sites) {
+            val area = AABB.ofSize(site.position, 3.0, 3.0, 3.0)
 
             level.getEntitiesOfClass(EndCrystal::class.java, area).forEach { it.discard() }
             level.getEntitiesOfClass(Skeleton::class.java, area).forEach { it.discard() }
 
-            val crystal = Crystals.spawnRespawned(level, pos) ?: continue
+            val crystal = Crystals.spawnRespawned(level, site.position) ?: continue
+            if (site !in protectedSites) continue
 
             val protector = CrystalProtector(level)
             protector.equipArmor()

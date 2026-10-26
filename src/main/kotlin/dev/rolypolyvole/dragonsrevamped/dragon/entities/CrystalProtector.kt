@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvents
+import net.minecraft.sounds.SoundSource
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.EquipmentSlot
@@ -24,6 +26,7 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim
 import net.minecraft.world.item.equipment.trim.TrimMaterials
 import net.minecraft.world.item.equipment.trim.TrimPatterns
 import net.minecraft.world.level.Level
+import net.minecraft.world.phys.Vec3
 import net.minecraft.world.level.block.entity.BannerPatternLayers
 import net.minecraft.world.level.block.entity.BannerPatterns
 import kotlin.math.cos
@@ -32,9 +35,12 @@ import kotlin.math.sin
 
 class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
-    private var orbitCrystal: EndCrystal? = null
+    private var orbitCrystal: OrbitCrystal? = null
     private var horse: CrystalProtectorHorse? = null
     private var outOfReachTicks = 0
+
+    var isHunter = false
+        private set
 
     init {
         getAttribute(Attributes.MAX_HEALTH)?.baseValue = 40.0
@@ -57,6 +63,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
     fun hasCrystal(): Boolean = orbitCrystal?.isAlive == true
 
     fun spawnWithMount(serverLevel: ServerLevel) {
+        isHunter = true
         serverLevel.addFreshEntity(this)
 
         val horse = CrystalProtectorHorse(serverLevel).apply {
@@ -137,8 +144,13 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     override fun tick() {
         updateOrbitCrystal()
+        updateFollowRange()
         swapWeapon()
         super.tick()
+    }
+
+    private fun updateFollowRange() {
+        getAttribute(Attributes.FOLLOW_RANGE)?.baseValue = if (vehicle is EndCrystal) SENTRY_RANGE else HUNTING_RANGE
     }
 
     override fun aiStep() {
@@ -198,6 +210,8 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
             return
         }
 
+        if (level() !is ServerLevel) return
+
         val angle = tickCount * 0.2
         val radius = 1.9 + sin(tickCount * 0.18) * 0.2
         val bobY = sin(tickCount * 0.18) * 0.35
@@ -206,16 +220,19 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         val newY = y + bobY + 0.5
         val newZ = z + sin(angle) * radius
 
-        crystal.teleportTo(newX, newY, newZ)
-
-        val serverLevel = level() as? ServerLevel ?: return
-        val packet = ClientboundEntityPositionSyncPacket.of(crystal)
-        serverLevel.chunkSource.sendToTrackingPlayers(crystal, packet)
+        crystal.moveVisibly(newX, newY, newZ)
     }
 
     override fun hurtServer(serverLevel: ServerLevel, damageSource: DamageSource, amount: Float): Boolean {
         val result = super.hurtServer(serverLevel, damageSource, amount)
         val player = damageSource.entity as? ServerPlayer
+
+        if (result && vehicle is EndCrystal) {
+            stopRiding()
+            updateFollowRange()
+
+            if (player != null && !player.isCreative) target = player
+        }
 
         if (result && player != null) {
             val message = Component.literal("❤ Protector Health: ${health.roundToInt()}").withStyle(ChatFormatting.DARK_AQUA)
@@ -236,10 +253,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
     }
 
     override fun die(damageSource: DamageSource) {
-        orbitCrystal?.let {
-            it.setPermanentlyInvulnerable(false)
-            it.hurtServer(level() as ServerLevel, damageSources().mobAttack(this), 1.0F)
-        }
+        orbitCrystal?.detonate(position(), this)
 
         orbitCrystal = null
         horse?.discard()
@@ -250,10 +264,63 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     companion object {
         private const val REACH_CHECK_INTERVAL = 10
+        private const val SENTRY_RANGE = 30.0
+        private const val HUNTING_RANGE = 196.0
     }
 
     class OrbitCrystal(level: Level) : EndCrystal(EntityTypes.END_CRYSTAL, level) {
+        private var detonationTicks = -1
+        private var detonationCenter = Vec3.ZERO
+        private var detonatedBy: LivingEntity? = null
+
         override fun shouldBeSaved(): Boolean = false
+
+        fun detonate(center: Vec3, cause: LivingEntity) {
+            detonationTicks = DETONATION_DELAY
+            detonationCenter = center.add(0.0, 1.0, 0.0)
+            detonatedBy = cause
+
+            moveVisibly(detonationCenter.x, detonationCenter.y, detonationCenter.z)
+            playDepleteSound()
+        }
+
+        override fun tick() {
+            super.tick()
+
+            if (detonationTicks < 0) return
+            val serverLevel = level() as? ServerLevel ?: return
+
+            if (detonationTicks-- == 0) {
+                val cause = detonatedBy ?: return
+                setPermanentlyInvulnerable(false)
+                hurtServer(serverLevel, damageSources().mobAttack(cause), 1.0F)
+                return
+            }
+
+            moveVisibly(
+                detonationCenter.x + (random.nextDouble() - 0.5) * SHAKE_DISTANCE,
+                detonationCenter.y + (random.nextDouble() - 0.5) * SHAKE_DISTANCE,
+                detonationCenter.z + (random.nextDouble() - 0.5) * SHAKE_DISTANCE
+            )
+
+            if (detonationTicks % 10 == 0) playDepleteSound()
+        }
+
+        fun moveVisibly(x: Double, y: Double, z: Double) {
+            teleportTo(x, y, z)
+
+            val serverLevel = level() as? ServerLevel ?: return
+            serverLevel.chunkSource.sendToTrackingPlayers(this, ClientboundEntityPositionSyncPacket.of(this))
+        }
+
+        private fun playDepleteSound() {
+            level().playSound(null, x, y, z, SoundEvents.RESPAWN_ANCHOR_DEPLETE, SoundSource.HOSTILE, 2.0F, 1.0F)
+        }
+
+        private companion object {
+            const val DETONATION_DELAY = 40
+            const val SHAKE_DISTANCE = 0.3
+        }
     }
 
     class CrystalProtectorHorse(level: Level) : Horse(EntityTypes.HORSE, level) {

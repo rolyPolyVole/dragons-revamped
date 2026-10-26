@@ -1,6 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
+import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
@@ -10,8 +11,6 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.phys.AABB
@@ -61,13 +60,8 @@ class CrystalRespawnAbility(
             .filterNot(::doesCrystalExist)
             .randomOrNull() ?: return
 
-        val crystal = EntityTypes.END_CRYSTAL.create(level, EntitySpawnReason.EVENT) ?: return
-
-        crystal.setPos(pos)
-        crystal.setShowBottom(false)
+        val crystal = Crystals.spawnRespawned(level, pos) ?: return
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
-
-        level.addFreshEntity(crystal)
 
         dragon.broadcastMessage(
             Component.literal("An End Crystal has respawned!").withColor(0xFF55FF)

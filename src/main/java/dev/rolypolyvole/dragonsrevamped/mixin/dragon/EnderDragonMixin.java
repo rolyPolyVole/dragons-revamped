@@ -3,9 +3,11 @@ package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
+import dev.rolypolyvole.dragonsrevamped.dragon.Crystals;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
@@ -79,6 +81,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     private DragonAbilityManager abilityManager;
     @Unique
     private boolean firstTick = true;
+    @Unique
+    private boolean exactDamage;
 
     protected EnderDragonMixin(EntityType<? extends Mob> entityType, Level level) {
         super(entityType, level);
@@ -211,7 +215,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void customDamage(EnderDragon dragon, ServerLevel serverLevel, DamageSource source, float damage, Operation<Void> original) {
-        original.call(dragon, serverLevel, source, adjustDamage(source));
+        original.call(dragon, serverLevel, source, exactDamage ? damageReceived : adjustDamage(source));
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
@@ -259,6 +263,14 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return (float) ((1.0F + fighters * 0.1F) * config.getCrystalHealRate());
     }
 
+    @WrapOperation(method = "checkCrystals()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;setHealth(F)V"))
+    private void capHealingAfterRage(EnderDragon dragon, float health, Operation<Void> original) {
+        if (abilityManager != null && abilityManager.getRageAbility().getHasPerformed()) {
+            health = Math.min(health, Math.max(getHealth(), getMaxHealth() * 0.5F));
+        }
+
+        original.call(dragon, health);
+    }
 
     @ModifyExpressionValue(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
     private boolean ignoreHurtTime(boolean original) {
@@ -303,9 +315,15 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return 128.0;
     }
 
-    @ModifyConstant(method = "onCrystalDestroyed", constant = @Constant(floatValue = 10.0F))
-    private float increaseCrystalDamage(float original) {
-        return 25.0F;
+    @WrapOperation(method = "onCrystalDestroyed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    private boolean crystalDamage(EnderDragon dragon, ServerLevel serverLevel, EnderDragonPart part, DamageSource source, float damage, Operation<Boolean> original, @Local(argsOnly = true) EndCrystal crystal) {
+        exactDamage = true;
+
+        try {
+            return original.call(dragon, serverLevel, part, source, Crystals.damageToDragon(crystal, getMaxHealth()));
+        } finally {
+            exactDamage = false;
+        }
     }
 
     @Inject(method = "tickDeath", at = @At("HEAD"))

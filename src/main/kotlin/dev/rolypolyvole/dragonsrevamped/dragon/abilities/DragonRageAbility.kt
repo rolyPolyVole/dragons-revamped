@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
+import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.SPEED_MULTIPLIER
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
@@ -47,7 +48,8 @@ class DragonRageAbility(
         private set
 
     private var stateTicks = 0
-    private var hasPerformed = false
+    var hasPerformed = false
+        private set
     private var firstTick = true
 
     private val level = dragon.level() as ServerLevel
@@ -78,7 +80,7 @@ class DragonRageAbility(
             State.GATHERING -> tickGathering()
             State.EXPLODING -> tickExploding()
             State.ROARING -> tickRoaring()
-            State.DONE -> checkReset()
+            State.DONE -> {}
         }
     }
 
@@ -101,13 +103,6 @@ class DragonRageAbility(
         if (dragon.health <= dragon.maxHealth * 0.5f) {
             transition(State.ASCENDING)
             dragon.phaseManager.setPhase(EnderDragonPhase.HOVERING)
-        }
-    }
-
-    private fun checkReset() {
-        if (dragon.health >= dragon.maxHealth) {
-            hasPerformed = false
-            state = State.IDLE
         }
     }
 
@@ -293,10 +288,7 @@ class DragonRageAbility(
             level.getEntitiesOfClass(EndCrystal::class.java, area).forEach { it.discard() }
             level.getEntitiesOfClass(Skeleton::class.java, area).forEach { it.discard() }
 
-            val crystal = EntityTypes.END_CRYSTAL.create(level, EntitySpawnReason.EVENT) ?: continue
-            crystal.setPos(pos)
-            crystal.setShowBottom(false)
-            level.addFreshEntity(crystal)
+            val crystal = Crystals.spawnRespawned(level, pos) ?: continue
 
             val protector = CrystalProtector(level)
             protector.equipArmor()

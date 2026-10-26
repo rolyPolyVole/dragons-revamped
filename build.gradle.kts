@@ -44,6 +44,7 @@ dependencies {
     implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    include(implementation("net.kyori:adventure-platform-fabric:${project.property("adventure_version")}")!!)
 
     testImplementation("net.fabricmc:fabric-loader-junit:${project.property("loader_version")}")
 }

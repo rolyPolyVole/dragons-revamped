@@ -14,7 +14,8 @@ class DragonConfig(
     val hyperHealRate: Double = 1.0,
     val crystalProtectorSpawnRate: Double = 1.0,
     val crystalRespawnRate: Double = 1.0,
-    val damage: DamageConfig = DamageConfig()
+    val damage: DamageConfig = DamageConfig(),
+    val deathMessages: DeathMessageConfig = DeathMessageConfig()
 ) {
     val fighters: Int
         get() = playerCount.coerceAtLeast(1)
@@ -40,3 +41,8 @@ class DifficultyDamage(
         Difficulty.HARD -> hard
     }
 }
+
+class DeathMessageConfig(
+    val lightning: String = "<player> was struck down by <dragon>",
+    val bodyHit: String = "<player> got run through by <dragon>"
+)

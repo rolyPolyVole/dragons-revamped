@@ -3,8 +3,8 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
 import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
@@ -288,7 +288,7 @@ class DragonRageAbility(
             level.getEntitiesOfClass(EndCrystal::class.java, area).forEach { it.discard() }
             level.getEntitiesOfClass(Skeleton::class.java, area).forEach { it.discard() }
 
-            val crystal = Crystals.spawnRespawned(level, site.position) ?: continue
+            val crystal = Crystals.respawn(level, site.position) ?: continue
             if (site !in protectedSites) continue
 
             val protector = CrystalProtector(level)

@@ -23,10 +23,12 @@ class CrystalRespawnAbility(
 
     private val level = dragon.level() as ServerLevel
 
+    /** Crystal location to remaining per-location cooldown ticks **/
     private val crystalLocations = CustomEndSpikes.getCrystalLocations(level)
         .associateWith { 0 }
         .toMutableMap()
 
+    /** Global cooldown **/
     private var cooldown = calculateCooldown()
     private var tooManyCrystals = false
 
@@ -65,13 +67,10 @@ class CrystalRespawnAbility(
             .filterNot(::doesCrystalExist)
             .randomOrNull() ?: return false
 
-        val crystal = Crystals.spawnRespawned(level, pos) ?: return false
+        val crystal = Crystals.respawn(level, pos) ?: return false
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
-        dragon.broadcastMessage(
-            Text.parse("<light_purple>An End Crystal has respawned!")
-        )
-
+        dragon.broadcastMessage(Text.parse("<light_purple>An End Crystal has respawned!"))
         sendCrystalCount()
         return true
     }

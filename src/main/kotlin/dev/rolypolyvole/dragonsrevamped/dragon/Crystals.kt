@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3
 object Crystals {
     private const val RESPAWNED_TAG = "dragons_revamped_respawned"
 
-    fun spawnRespawned(level: ServerLevel, position: Vec3): EndCrystal? {
+    fun respawn(level: ServerLevel, position: Vec3): EndCrystal? {
         val crystal = EntityTypes.END_CRYSTAL.create(level, EntitySpawnReason.EVENT) ?: return null
 
         crystal.setPos(position)

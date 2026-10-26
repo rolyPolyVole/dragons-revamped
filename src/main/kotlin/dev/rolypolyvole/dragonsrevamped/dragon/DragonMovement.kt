@@ -22,6 +22,7 @@ fun EnderDragon.turnTowards(target: Vec3, maxStep: Float) {
     val dx = target.x - x
     val dz = target.z - z
     val targetYaw = 180.0F - (atan2(dx, dz) * Mth.RAD_TO_DEG).toFloat()
+
     yRot = Mth.approachDegrees(yRot, targetYaw, maxStep)
 }
 

@@ -20,7 +20,11 @@ object ModConfig {
 
     fun load() {
         current = try {
-            if (path.exists()) gson.fromJson(path.readText(), DragonConfig::class.java) ?: DragonConfig() else DragonConfig()
+            if (path.exists()) {
+                gson.fromJson(path.readText(), DragonConfig::class.java) ?: DragonConfig()
+            } else {
+                DragonConfig()
+            }
         } catch (exception: JsonParseException) {
             DragonsRevamped.LOGGER.error("Couldn't parse {}, using the default config until it's fixed", path, exception)
             return

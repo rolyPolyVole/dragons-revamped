@@ -153,19 +153,9 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         getAttribute(Attributes.FOLLOW_RANGE)?.baseValue = if (vehicle is EndCrystal) SENTRY_RANGE else HUNTING_RANGE
     }
 
-    override fun aiStep() {
-        super.aiStep()
-
-        if (vehicle is EndCrystal) {
-            val target = this.target ?: return
-
-            if (distanceToSqr(target) < 20.0 * 20.0) {
-                stopRiding()
-            }
-        }
-    }
-
     override fun getMaxFallDistance(): Int = Int.MAX_VALUE
+
+    override fun fireImmune(): Boolean = true
 
     private fun swapWeapon() {
         val target = this.target ?: return
@@ -227,7 +217,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         val result = super.hurtServer(serverLevel, damageSource, amount)
         val player = damageSource.entity as? ServerPlayer
 
-        if (result && vehicle is EndCrystal) {
+        if (result && vehicle is EndCrystal && damageSource.entity != null) {
             stopRiding()
             updateFollowRange()
 
@@ -304,6 +294,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
             )
 
             if (detonationTicks % 10 == 0) playDepleteSound()
+
         }
 
         fun moveVisibly(x: Double, y: Double, z: Double) {
@@ -365,5 +356,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         override fun canPerformRearing(): Boolean = canStand
+
+        override fun fireImmune(): Boolean = true
     }
 }

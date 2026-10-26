@@ -35,29 +35,29 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun start(): Boolean {
         val playerCount = dragon.nearbyPlayers().size
-        this.chargesRemaining = 4.coerceAtLeast(playerCount)
+        chargesRemaining = 4.coerceAtLeast(playerCount)
 
         return startNextCharge()
     }
 
     private fun startNextCharge(): Boolean {
         if (chargesRemaining <= 0) {
-            this.shouldEnd = true
+            shouldEnd = true
             return false
         }
 
         val charge = ChargeAttack(dragon)
 
         if (!charge.start()) {
-            this.shouldEnd = true
+            shouldEnd = true
             return false
         }
 
         charge.chargeSpeedMultiplier = 1.3
 
-        this.currentCharge = charge
-        this.chargesRemaining--
-        this.roarTicks = 0
+        currentCharge = charge
+        chargesRemaining--
+        roarTicks = 0
         return true
     }
 
@@ -66,7 +66,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, volume = 2.0F, pitch = 0.5F + roarTicks * 0.2F)
         }
 
-        val charge = currentCharge ?: run { this.shouldEnd = true; return }
+        val charge = currentCharge ?: run { shouldEnd = true; return }
 
         charge.tick()
 
@@ -76,7 +76,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             if (chargesRemaining > 0) {
                 startNextCharge()
             } else {
-                this.shouldEnd = true
+                shouldEnd = true
             }
         }
     }

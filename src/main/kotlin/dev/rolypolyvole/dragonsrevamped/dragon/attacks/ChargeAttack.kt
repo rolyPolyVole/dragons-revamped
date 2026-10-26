@@ -40,7 +40,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     var chargeSpeedMultiplier: Double = 1.0
 
     override fun tick() {
-        this.ticks++
+        ticks++
 
         if (targetLocation != null) {
             val vector = targetLocation!!.subtract(dragon.position()).reverse()
@@ -52,23 +52,23 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         val target = this.target
 
         if (target == null || target.hasDisconnected()) {
-            this.shouldEnd = true
+            shouldEnd = true
             return
         }
 
         if (ticks < 20) return
 
         if (ticks == 20) {
-            this.targetLocation = this.getTargetLocation()
-            this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+            targetLocation = getTargetLocation()
+            direction = targetLocation!!.subtract(dragon.position()).normalize()
         }
 
         if (!resurfacing && ticks > 20 && ticks % 5 == 0 && target.isAlive) {
             val newTarget = getTargetLocation()
 
             if (newTarget.distanceToSqr(targetLocation!!) < 100.0) {
-                this.targetLocation = newTarget
-                this.direction = targetLocation!!.subtract(dragon.position()).normalize()
+                targetLocation = newTarget
+                direction = targetLocation!!.subtract(dragon.position()).normalize()
 
                 chargeTowards(targetLocation!!)
             }
@@ -80,12 +80,12 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             val remaining = currentTarget.subtract(dragon.position())
 
             if (remaining.dot(currentDirection) <= 0 || dragon.position().distanceTo(currentTarget) < 5.0) {
-                this.resurfacing = true
+                resurfacing = true
 
                 val horizontal = currentDirection.multiply(1.0, 0.0, 1.0).normalize()
                 val newDirection = Vec3(horizontal.x, 1.0, horizontal.z).normalize()
 
-                this.targetLocation = dragon.position().add(newDirection.scale(50.0))
+                targetLocation = dragon.position().add(newDirection.scale(50.0))
 
                 chargeTowards(targetLocation!!)
             }
@@ -109,12 +109,12 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun start(): Boolean {
-        this.target = dragon.nearbyPlayers()
+        target = dragon.nearbyPlayers()
             .filter(::isTargetValid)
             .randomOrNull()
-            ?: run { this.shouldEnd = true; return false }
+            ?: run { shouldEnd = true; return false }
 
-        this.targetLocation = this.getTargetLocation()
+        targetLocation = getTargetLocation()
 
         chargeTowards(targetLocation!!)
         dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)

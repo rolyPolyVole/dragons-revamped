@@ -44,10 +44,10 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         getAttribute(Attributes.MOVEMENT_SPEED)?.baseValue = 0.32
         getAttribute(Attributes.SAFE_FALL_DISTANCE)?.baseValue = 100.0
 
-        this.health = maxHealth
+        health = maxHealth
 
-        this.customName = Component.literal("Crystal Protector").withStyle(ChatFormatting.DARK_PURPLE)
-        this.isCustomNameVisible = true
+        customName = Component.literal("Crystal Protector").withStyle(ChatFormatting.DARK_PURPLE)
+        isCustomNameVisible = true
 
         EquipmentSlot.entries.forEach { setDropChance(it, 0f) }
     }
@@ -67,7 +67,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         serverLevel.addFreshEntity(horse)
-        this.startRiding(horse, true, true)
+        startRiding(horse, true, true)
         this.horse = horse
 
         val crystal = OrbitCrystal(serverLevel).apply {
@@ -77,7 +77,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         serverLevel.addFreshEntity(crystal)
-        this.orbitCrystal = crystal
+        orbitCrystal = crystal
 
         equipArmor()
     }
@@ -227,10 +227,10 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
     override fun remove(reason: RemovalReason) {
         orbitCrystal?.discard()
-        this.orbitCrystal = null
+        orbitCrystal = null
 
         horse?.discard()
-        this.horse = null
+        horse = null
 
         super.remove(reason)
     }
@@ -238,12 +238,12 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
     override fun die(damageSource: DamageSource) {
         orbitCrystal?.let {
             it.setPermanentlyInvulnerable(false)
-            it.hurtServer(level() as ServerLevel, this.damageSources().mobAttack(this), 1.0F)
+            it.hurtServer(level() as ServerLevel, damageSources().mobAttack(this), 1.0F)
         }
 
-        this.orbitCrystal = null
-        this.horse?.discard()
-        this.horse = null
+        orbitCrystal = null
+        horse?.discard()
+        horse = null
 
         super.die(damageSource)
     }
@@ -291,9 +291,9 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         override fun hurtServer(serverLevel: ServerLevel, damageSource: DamageSource, f: Float): Boolean {
-            this.canStand = false
+            canStand = false
             val result = super.hurtServer(serverLevel, damageSource, f)
-            this.canStand = true
+            canStand = true
             return result
         }
 

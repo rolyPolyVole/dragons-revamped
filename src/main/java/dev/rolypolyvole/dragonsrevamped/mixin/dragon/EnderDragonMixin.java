@@ -87,7 +87,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(EntityType<? extends EnderDragon> entityType, Level level, CallbackInfo ci) {
-        this.setCustomName(Component.literal("Ender Dragon").withStyle(ChatFormatting.LIGHT_PURPLE));
+        setCustomName(Component.literal("Ender Dragon").withStyle(ChatFormatting.LIGHT_PURPLE));
 
         var maxHealth = ((RangedAttributeAccessor) getAttribute(Attributes.MAX_HEALTH).getAttribute().value());
         maxHealth.setMaxValue(Double.MAX_VALUE);
@@ -96,8 +96,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (level.isClientSide()) return;
 
-        this.attackManager = new DragonAttackManager(self());
-        this.abilityManager = new DragonAbilityManager(self());
+        attackManager = new DragonAttackManager(self());
+        abilityManager = new DragonAbilityManager(self());
     }
 
     @Unique
@@ -140,7 +140,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         if (getHealth() <= 1.0F) return;
 
         if (firstTick) {
-            this.firstTick = false;
+            firstTick = false;
             phaseManager.setPhase(EnderDragonPhase.HOLDING_PATTERN);
         }
 
@@ -162,14 +162,14 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     private void updateMaxHealth() {
         long playerCount = Math.max(nearbyPlayerCount(), 1);
         if (playerCount == lastPlayerCount) return;
-        this.lastPlayerCount = playerCount;
+        lastPlayerCount = playerCount;
 
         double newMax = 800.0 + 700 * Math.sqrt(playerCount - 1);
-        float oldMax = this.getMaxHealth();
-        float healthPercent = this.getHealth() / oldMax;
+        float oldMax = getMaxHealth();
+        float healthPercent = getHealth() / oldMax;
 
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(newMax);
-        this.setHealth(healthPercent * (float) newMax);
+        getAttribute(Attributes.MAX_HEALTH).setBaseValue(newMax);
+        setHealth(healthPercent * (float) newMax);
     }
 
     @Inject(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Ljava/util/List;)V", at = @At("HEAD"), cancellable = true)
@@ -191,8 +191,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     private void wingAttack(ServerLevel serverLevel, List<Entity> list, CallbackInfo info) {
         float damage = 8.0F;
 
-        double centerX = (this.body.getBoundingBox().minX + this.body.getBoundingBox().maxX) / 2.0;
-        double centerZ = (this.body.getBoundingBox().minZ + this.body.getBoundingBox().maxZ) / 2.0;
+        double centerX = (body.getBoundingBox().minX + body.getBoundingBox().maxX) / 2.0;
+        double centerZ = (body.getBoundingBox().minZ + body.getBoundingBox().maxZ) / 2.0;
 
         for (Entity entity : list) {
             if (entity instanceof LivingEntity livingEntity) {
@@ -203,7 +203,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
                 entity.push(dx / distanceSqr * 4.0, yVelocity, dz / distanceSqr * 4.0);
 
-                boolean isSitting = this.phaseManager.getCurrentPhase().isSitting();
+                boolean isSitting = phaseManager.getCurrentPhase().isSitting();
                 boolean onCooldown = livingEntity.getLastHurtByMobTimestamp() >= entity.tickCount - 2;
 
                 if (!isSitting && !onCooldown) {
@@ -224,8 +224,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             return;
         }
 
-        this.hitPart = part;
-        this.damageReceived = amount;
+        hitPart = part;
+        damageReceived = amount;
     }
 
     @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
@@ -247,7 +247,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         original.call(dragon, serverLevel, source, finalDamage);
 
         if (source.getEntity() instanceof ServerPlayer player) {
-            int health = this.getHealth() <= 1.0F ? 0 : Math.round(this.getHealth());
+            int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
             Component message = Component.literal("❤ Dragon Health: " + health).withStyle(ChatFormatting.RED);
 
             player.sendSystemMessage(message, true);

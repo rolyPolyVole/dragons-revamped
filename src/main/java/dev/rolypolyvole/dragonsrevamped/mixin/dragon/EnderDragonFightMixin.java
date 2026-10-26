@@ -19,7 +19,7 @@ public abstract class EnderDragonFightMixin {
 
     @Inject(method = "init", at = @At("RETURN"))
     private void customizeBossBar(ServerLevel level, long seed, BlockPos origin, CallbackInfo ci) {
-        this.dragonEvent.setCreateWorldFog(false);
-        this.dragonEvent.setOverlay(BossEvent.BossBarOverlay.NOTCHED_6);
+        dragonEvent.setCreateWorldFog(false);
+        dragonEvent.setOverlay(BossEvent.BossBarOverlay.NOTCHED_6);
     }
 }

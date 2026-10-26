@@ -69,9 +69,9 @@ class PhantomMite(level: Level, private val arrow: WitherArrow) : Endermite(Enti
     override fun canBeHitByProjectile(): Boolean = false
 
     override fun tick() {
-        this.noPhysics = arrow.isAlive && arrow.deltaMovement.lengthSqr() != 0.0
+        noPhysics = arrow.isAlive && arrow.deltaMovement.lengthSqr() != 0.0
 
-        if (noPhysics) this.deltaMovement = arrow.deltaMovement.normalize()
+        if (noPhysics) deltaMovement = arrow.deltaMovement.normalize()
         else stopRiding()
 
         super.tick()

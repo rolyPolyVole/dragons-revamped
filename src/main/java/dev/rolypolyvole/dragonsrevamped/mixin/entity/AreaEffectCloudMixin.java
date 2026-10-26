@@ -40,11 +40,11 @@ public abstract class AreaEffectCloudMixin extends Entity {
 
     @ModifyExpressionValue(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"))
     private List<LivingEntity> filterAndBuffEndermen(List<LivingEntity> entities) {
-        if (!(this.getOwner() instanceof EnderDragon)) {
+        if (!(getOwner() instanceof EnderDragon)) {
             return entities;
         }
 
-        float radius = this.getRadius();
+        float radius = getRadius();
         List<LivingEntity> filtered = new ArrayList<>();
 
         for (LivingEntity entity : entities) {
@@ -52,8 +52,8 @@ public abstract class AreaEffectCloudMixin extends Entity {
             if (entity instanceof CrystalProtector) continue;
 
             if (entity instanceof Enderman enderman) {
-                double dx = enderman.getX() - this.getX();
-                double dz = enderman.getZ() - this.getZ();
+                double dx = enderman.getX() - getX();
+                double dz = enderman.getZ() - getZ();
                 if (dx * dx + dz * dz <= radius * radius) {
                     enderman.addEffect(new MobEffectInstance(MobEffects.STRENGTH, 200, 1));
                     enderman.addEffect(new MobEffectInstance(MobEffects.SPEED, 200, 1));
@@ -68,19 +68,19 @@ public abstract class AreaEffectCloudMixin extends Entity {
 
     @Inject(method = "serverTick", at = @At("HEAD"))
     private void corrodeItems(ServerLevel serverLevel, CallbackInfo ci) {
-        if (!(this.getOwner() instanceof EnderDragon)) return;
+        if (!(getOwner() instanceof EnderDragon)) return;
 
-        float radius = this.getRadius();
-        AABB aabb = this.getBoundingBox().inflate(radius, 2.0, radius);
-        List<ItemEntity> items = this.level().getEntitiesOfClass(ItemEntity.class, aabb);
+        float radius = getRadius();
+        AABB aabb = getBoundingBox().inflate(radius, 2.0, radius);
+        List<ItemEntity> items = level().getEntitiesOfClass(ItemEntity.class, aabb);
 
         for (ItemEntity item : items) {
             var stack = item.getItem();
             if (stack.is(Items.DRAGON_EGG)) continue;
             if (stack.has(DataComponents.DAMAGE_RESISTANT)) continue;
 
-            double dx = item.getX() - this.getX();
-            double dz = item.getZ() - this.getZ();
+            double dx = item.getX() - getX();
+            double dz = item.getZ() - getZ();
             if (dx * dx + dz * dz <= radius * radius) {
                 item.discard();
             }

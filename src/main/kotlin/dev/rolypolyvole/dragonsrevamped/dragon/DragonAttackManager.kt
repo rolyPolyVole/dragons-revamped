@@ -28,16 +28,16 @@ class DragonAttackManager(private val dragon: EnderDragon) {
             if (it.shouldEnd()) {
                 it.end()
 
-                this.lastAttack = it
-                this.currentAttack = null
-                this.ticksUntilNextAttack = (80..200).random()
+                lastAttack = it
+                currentAttack = null
+                ticksUntilNextAttack = (80..200).random()
             }
 
             return
         }
 
         if (ticksUntilNextAttack > 0) {
-            this.ticksUntilNextAttack--
+            ticksUntilNextAttack--
             return
         }
 
@@ -46,9 +46,9 @@ class DragonAttackManager(private val dragon: EnderDragon) {
             .randomOrNull()?.create(dragon)
 
         if (picked != null && picked.start()) {
-            this.currentAttack = picked
+            currentAttack = picked
         } else {
-            this.ticksUntilNextAttack = 20
+            ticksUntilNextAttack = 20
         }
     }
 

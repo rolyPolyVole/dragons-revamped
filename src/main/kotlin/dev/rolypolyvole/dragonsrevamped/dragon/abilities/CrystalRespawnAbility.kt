@@ -23,16 +23,16 @@ class CrystalRespawnAbility(
     manager: DragonAbilityManager
 ) : AbstractDragonAbility(dragon, manager) {
 
-    private val level = this.dragon.level() as ServerLevel
+    private val level = dragon.level() as ServerLevel
 
-    private val crystalLocations = CustomEndSpikes.getCrystalLocations(this.level)
+    private val crystalLocations = CustomEndSpikes.getCrystalLocations(level)
         .associateWith { 0 }
         .toMutableMap()
 
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = this.dragon.nearbyPlayers().size.coerceAtLeast(1)
+        val playerCount = dragon.nearbyPlayers().size.coerceAtLeast(1)
         val crystals = getTotalCrystals()
 
         val min = 400
@@ -43,33 +43,33 @@ class CrystalRespawnAbility(
     }
 
     override fun tick() {
-        this.crystalLocations.replaceAll { _, value ->
+        crystalLocations.replaceAll { _, value ->
             (value - 1).coerceAtLeast(0)
         }
 
-        if (this.cooldown > 0) {
-            this.cooldown--
+        if (cooldown > 0) {
+            cooldown--
         } else {
             respawnCrystal()
-            this.cooldown = calculateCooldown()
+            cooldown = calculateCooldown()
         }
     }
 
     private fun respawnCrystal() {
-        val pos = this.crystalLocations
+        val pos = crystalLocations
             .filter { it.value == 0 }.keys
             .filterNot(::doesCrystalExist)
             .randomOrNull() ?: return
 
-        val crystal = EntityTypes.END_CRYSTAL.create(this.level, EntitySpawnReason.EVENT) ?: return
+        val crystal = EntityTypes.END_CRYSTAL.create(level, EntitySpawnReason.EVENT) ?: return
 
         crystal.setPos(pos)
         crystal.setShowBottom(false)
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
-        this.level.addFreshEntity(crystal)
+        level.addFreshEntity(crystal)
 
-        this.dragon.broadcastMessage(
+        dragon.broadcastMessage(
             Component.literal("An End Crystal has respawned!").withColor(0xFF55FF)
         )
 
@@ -78,29 +78,29 @@ class CrystalRespawnAbility(
 
     fun doesCrystalExist(vec: Vec3): Boolean {
         val aabb = AABB(vec.add(-0.5, -0.5, -0.5), vec.add(0.5, 0.5, 0.5)).inflate(1.5)
-        return this.level.getEntitiesOfClass(EndCrystal::class.java, aabb).isNotEmpty()
+        return level.getEntitiesOfClass(EndCrystal::class.java, aabb).isNotEmpty()
     }
 
     fun onCrystalDestroyed(pos: BlockPos) {
-        val key = this.crystalLocations.keys.minByOrNull { it.distanceToSqr(Vec3.atCenterOf(pos)) } ?: return
-        this.crystalLocations[key] = 600
+        val key = crystalLocations.keys.minByOrNull { it.distanceToSqr(Vec3.atCenterOf(pos)) } ?: return
+        crystalLocations[key] = 600
     }
 
     fun resetCooldowns() {
-        this.crystalLocations.replaceAll { _, _ -> 0 }
+        crystalLocations.replaceAll { _, _ -> 0 }
     }
 
     fun getTotalCrystals(): Int {
-        val pillarCrystals = this.crystalLocations.keys.count(::doesCrystalExist)
+        val pillarCrystals = crystalLocations.keys.count(::doesCrystalExist)
         val protectorCrystals = getProtectorCrystals()
         return pillarCrystals + protectorCrystals
     }
 
     private fun getProtectorCrystals(): Int {
-        val center = Vec3.atCenterOf(this.dragon.fightOrigin)
+        val center = Vec3.atCenterOf(dragon.fightOrigin)
         val aabb = AABB.ofSize(center, 400.0, 400.0, 400.0)
 
-        return this.level
+        return level
             .getEntitiesOfClass(CrystalProtector::class.java, aabb)
             .count(CrystalProtector::hasCrystal)
     }
@@ -109,6 +109,6 @@ class CrystalRespawnAbility(
         val count = getTotalCrystals()
         val message = Component.literal("✦ Crystals Remaining: $count").withStyle(ChatFormatting.DARK_PURPLE)
 
-        this.dragon.broadcastMessage(message, true)
+        dragon.broadcastMessage(message, true)
     }
 }

@@ -64,31 +64,31 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         if (ticks++ < 40) return
 
         if (ticks > 15 * 20) {
-            this.shouldEnd = true
+            shouldEnd = true
             return
         }
 
         if (ticksUntilChangeTarget > 0) {
-            this.ticksUntilChangeTarget--
+            ticksUntilChangeTarget--
         } else {
             if (targeted > minTargets && random < (targeted / (targeted + 3.0))) {
-                this.shouldEnd = true
+                shouldEnd = true
                 return
             }
 
-            this.target = dragon.nearbyPlayers()
+            target = dragon.nearbyPlayers()
                 .filter { !it.isCreative && !it.isSpectator && it.isAlive }
                 .filter { it.position().distanceToSqr(dragon.position()) < 22500.0 }
                 .filter { dragon.hasLineOfSight(it) }
                 .randomOrNull() ?: run { shouldEnd = true; return }
 
-            this.ticksUntilChangeTarget = (45..65).random()
-            this.targeted++
+            ticksUntilChangeTarget = (45..65).random()
+            targeted++
         }
 
         val target = this.target
         if (target == null || target.hasDisconnected() || !dragon.hasLineOfSight(target)) {
-            this.ticksUntilChangeTarget = 0
+            ticksUntilChangeTarget = 0
             return
         }
 
@@ -119,7 +119,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun start(): Boolean {
-        this.outpost = this.getOutpostLocation()
+        outpost = getOutpostLocation()
 
         chargeTowards(outpost)
         dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)

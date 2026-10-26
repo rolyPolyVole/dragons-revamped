@@ -42,7 +42,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun tick() {
         if (!reachedOutpost) return
 
-        if (this.ticks++ == 0) {
+        if (ticks++ == 0) {
             hover()
             dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, pitch = 0.8F + random * 0.3F)
         }
@@ -59,7 +59,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             .filter(::isPlayerExposed)
             .forEach(::strikePlayer)
 
-        this.shouldEnd = true
+        shouldEnd = true
     }
 
     override fun beforeMove() {
@@ -71,7 +71,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         val delta = outpost.subtract(dragon.position())
 
         if (delta.lengthSqr() < 256.0) {
-            this.reachedOutpost = true
+            reachedOutpost = true
             dragon.deltaMovement = Vec3.ZERO
             return
         }
@@ -82,7 +82,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     override fun start(): Boolean {
-        this.outpost = this.getOutpostLocation()
+        outpost = getOutpostLocation()
 
         chargeTowards(outpost)
         dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)

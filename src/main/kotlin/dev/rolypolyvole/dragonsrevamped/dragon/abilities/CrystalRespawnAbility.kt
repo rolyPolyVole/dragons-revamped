@@ -54,19 +54,18 @@ class CrystalRespawnAbility(
 
         if (cooldown > 0) {
             cooldown--
-        } else {
-            respawnCrystal()
+        } else if (respawnCrystal()) {
             cooldown = calculateCooldown()
         }
     }
 
-    private fun respawnCrystal() {
+    private fun respawnCrystal(): Boolean {
         val pos = crystalLocations
             .filter { it.value == 0 }.keys
             .filterNot(::doesCrystalExist)
-            .randomOrNull() ?: return
+            .randomOrNull() ?: return false
 
-        val crystal = Crystals.spawnRespawned(level, pos) ?: return
+        val crystal = Crystals.spawnRespawned(level, pos) ?: return false
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
         dragon.broadcastMessage(
@@ -74,6 +73,7 @@ class CrystalRespawnAbility(
         )
 
         sendCrystalCount()
+        return true
     }
 
     fun doesCrystalExist(vec: Vec3): Boolean {

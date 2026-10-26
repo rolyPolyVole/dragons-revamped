@@ -29,7 +29,7 @@ public abstract class LivingEntityMixin {
 
     @ModifyExpressionValue(method = "getDamageAfterMagicAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getDamageProtection(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/damagesource/DamageSource;)F"))
     private float weakenProtectionAgainstBodyHits(float protection, @Local(argsOnly = true) DamageSource source) {
-        return source.is(DragonDamageTypes.DRAGON_BODY_HIT) ? protection * (float) ModConfig.getCurrent().getProtectionEffectiveness() : protection;
+        return source.is(DragonDamageTypes.DRAGON_BODY_HIT) ? protection * (float) ModConfig.getCurrent().getDamage().getProtectionEffectiveness() : protection;
     }
 
     @WrapOperation(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))

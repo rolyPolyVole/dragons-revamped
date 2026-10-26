@@ -15,7 +15,7 @@ private const val CHUNK_TICKET_RADIUS = 3
 private const val MIN_HEIGHT_ABOVE_ORIGIN = 40.0
 
 fun EnderDragon.flyTowards(target: Vec3, speed: Double) {
-    deltaMovement = target.subtract(position()).normalize().scale(speed * ModConfig.current.dragonSpeedMultiplier)
+    deltaMovement = target.subtract(position()).normalize().scale(speed * ModConfig.current.dragon.speedMultiplier)
 }
 
 fun EnderDragon.turnTowards(target: Vec3, maxStep: Float) {

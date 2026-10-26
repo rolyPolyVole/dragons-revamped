@@ -32,7 +32,7 @@ class HunterSpawnAbility(
         val base = (1200..1500).random()
         val scaled = 1200 / sqrt(config.fighters.toDouble())
 
-        return ((base + scaled) / config.crystalProtectorSpawnRate).toInt()
+        return ((base + scaled) / config.crystalProtectors.spawnRate).toInt()
     }
 
     override fun tick() {

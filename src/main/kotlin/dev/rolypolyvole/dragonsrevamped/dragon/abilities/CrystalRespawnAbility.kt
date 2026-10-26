@@ -38,7 +38,7 @@ class CrystalRespawnAbility(
         val scaled = 1200 / sqrt(config.fighters.toDouble())
         val extra = crystals * 150
 
-        return ((min + scaled + extra) / config.crystalRespawnRate).toInt()
+        return ((min + scaled + extra) / config.crystals.respawnRate).toInt()
     }
 
     override fun tick() {
@@ -47,7 +47,7 @@ class CrystalRespawnAbility(
         }
 
         if (dragon.tickCount % CRYSTAL_CHECK_INTERVAL == 0) {
-            tooManyCrystals = getTotalCrystals() >= ModConfig.current.crystalRespawnThreshold
+            tooManyCrystals = getTotalCrystals() >= ModConfig.current.crystals.respawnThreshold
         }
 
         if (tooManyCrystals) return

@@ -20,7 +20,7 @@ public abstract class EnderDragonFightMixin {
 
     @Inject(method = "init", at = @At("RETURN"))
     private void customizeBossBar(ServerLevel level, long seed, BlockPos origin, CallbackInfo ci) {
-        if (ModConfig.getCurrent().getDisableFog()) {
+        if (ModConfig.getCurrent().getMisc().getDisableFog()) {
             dragonEvent.setCreateWorldFog(false);
         }
 

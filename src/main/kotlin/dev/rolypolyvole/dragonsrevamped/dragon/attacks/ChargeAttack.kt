@@ -93,7 +93,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             }
         }
 
-        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.diveSpeedMultiplier) * chargeSpeedMultiplier
+        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.dragon.diveSpeedMultiplier) * chargeSpeedMultiplier
         dragon.flyTowards(targetLocation ?: return, speed)
     }
 

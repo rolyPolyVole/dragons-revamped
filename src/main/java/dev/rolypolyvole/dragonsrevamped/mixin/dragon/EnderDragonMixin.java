@@ -112,7 +112,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @Unique
     private boolean finishedCooldown() {
         boolean firstFight = dragonFight != null && !dragonFight.hasPreviouslyKilledDragon();
-        return !firstFight || tickCount > ModConfig.getCurrent().getGracePeriodSeconds() * 20;
+        return !firstFight || tickCount > ModConfig.getCurrent().getDragon().getGracePeriodSeconds() * 20;
     }
 
     @Unique
@@ -243,8 +243,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             damage *= 0.2F;
         }
 
-        if (ModConfig.getCurrent().getLimitMaxDamagePerHit()) {
-            damage = Math.min(damage, (float) ModConfig.getCurrent().getMaxDamagePerHit());
+        if (ModConfig.getCurrent().getDragon().getLimitMaxDamagePerHit()) {
+            damage = Math.min(damage, (float) ModConfig.getCurrent().getDragon().getMaxDamagePerHit());
         }
 
         return damage;
@@ -262,11 +262,11 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         int ticksSinceLastHurt = tickCount - getLastHurtByMobTimestamp();
         int hyperHealDelay = (int) (300 + 900 / Math.sqrt(fighters));
 
-        if (config.getHyperHeal() && ticksSinceLastHurt > hyperHealDelay) {
-            return (float) (getMaxHealth() * 0.01F * config.getHyperHealRate());
+        if (config.getHealing().getHyperHeal() && ticksSinceLastHurt > hyperHealDelay) {
+            return (float) (getMaxHealth() * 0.01F * config.getHealing().getHyperHealRate());
         }
 
-        return (float) ((1.0F + fighters * 0.1F) * config.getCrystalHealRate());
+        return (float) ((1.0F + fighters * 0.1F) * config.getHealing().getCrystalHealRate());
     }
 
 
@@ -280,9 +280,9 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         float speed = Math.max(1.0F, original.call(instance));
 
         if (instance.getPhase() == EnderDragonPhase.CHARGING_PLAYER) {
-            return speed * 2.4F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier();
+            return speed * 2.4F * (float) ModConfig.getCurrent().getDragon().getSpeedMultiplier();
         } else {
-            return speed * 1.7F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier();
+            return speed * 1.7F * (float) ModConfig.getCurrent().getDragon().getSpeedMultiplier();
         }
     }
 
@@ -293,7 +293,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @ModifyConstant(method = "aiStep()V", constant = @Constant(floatValue = 0.06F))
     private float forwardMovement(float original) {
-        return original * 1.7F * (float) ModConfig.getCurrent().getDragonSpeedMultiplier() * attackManager.getSpeedMultiplier();
+        return original * 1.7F * (float) ModConfig.getCurrent().getDragon().getSpeedMultiplier() * attackManager.getSpeedMultiplier();
     }
 
     @WrapOperation(method = "checkWalls", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))

@@ -87,7 +87,7 @@ class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun beforeMove() {
         when (stage) {
-            Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.diveSpeedMultiplier)
+            Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.dragon.diveSpeedMultiplier)
             Stage.LINGER -> limitClimbRate()
         }
     }

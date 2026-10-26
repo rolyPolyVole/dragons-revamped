@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.config
 
+import com.google.gson.FormattingStyle
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import dev.rolypolyvole.dragonsrevamped.DragonsRevamped
@@ -10,7 +11,7 @@ import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 object ModConfig {
-    private val gson = GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create()
+    private val gson = GsonBuilder().setFormattingStyle(FormattingStyle.PRETTY.withIndent("    ")).serializeNulls().disableHtmlEscaping().create()
     private val path = FabricLoader.getInstance().configDir.resolve("${DragonsRevamped.MOD_ID}.json")
 
     @JvmStatic

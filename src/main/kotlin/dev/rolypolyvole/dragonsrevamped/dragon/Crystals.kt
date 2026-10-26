@@ -25,7 +25,7 @@ object Crystals {
     @JvmStatic
     fun damageToDragon(crystal: EndCrystal): Float {
         val config = ModConfig.current
-        val damage = if (isFresh(crystal)) config.initialCrystalDamage else config.respawnedCrystalDamage
+        val damage = if (isFresh(crystal)) config.crystals.initialDamage else config.crystals.respawnedDamage
         return damage.toFloat()
     }
 

@@ -280,7 +280,7 @@ class DragonRageAbility(
 
     private fun respawnAllCrystals() {
         val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }
-        val protectedSites = sites.take(ModConfig.current.crystalProtectorAmount)
+        val protectedSites = sites.take(ModConfig.current.crystalProtectors.amountOnCrystals)
 
         for (site in sites) {
             val area = AABB.ofSize(site.position, 3.0, 3.0, 3.0)

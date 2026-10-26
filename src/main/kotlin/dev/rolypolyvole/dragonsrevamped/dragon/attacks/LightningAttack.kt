@@ -5,7 +5,6 @@ import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
 import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
-import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.sendSound
 import net.minecraft.sounds.SoundEvents
@@ -14,6 +13,7 @@ import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
 import kotlin.reflect.KClass
 
@@ -112,10 +112,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private fun isPlayerExposed(player: Player): Boolean {
         if (player.isCreative || player.isSpectator || !player.isAlive) return false
 
-        val blockY = player.blockPosition().highestBlockY(level).y
-        val playerY = player.blockPosition().y
-
-        return playerY >= blockY
+        val roofY = level.getHeight(Heightmap.Types.OCEAN_FLOOR, player.blockX, player.blockZ)
+        return player.blockY >= roofY
     }
 
     private fun strikePlayer(player: Player) {

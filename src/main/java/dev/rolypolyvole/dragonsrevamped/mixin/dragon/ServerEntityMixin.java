@@ -17,6 +17,11 @@ public abstract class ServerEntityMixin {
     @Shadow @Final
     private Entity entity;
 
+    /**
+     * There is a weird bug where the dragon starts flapping its wings absurdly fast
+     * when it's hit while hovering
+     */
+
     @Inject(method = "sendChanges", at = @At("HEAD"))
     private void preventInsaneWingFlaps(CallbackInfo ci) {
         if (!(entity instanceof EnderDragon dragon)) return;

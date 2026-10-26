@@ -137,6 +137,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         if (stageTicks == 1) {
             level.playSound(null, mouth.x, mouth.y, mouth.z, SoundEvents.ENDER_DRAGON_SHOOT, SoundSource.HOSTILE, 4.0F, 0.6F + random * 0.2F)
+            dragon.broadcastSound(SoundEvents.ENDER_DRAGON_GROWL, 4.0F, 0.5F)
         }
 
         repeat(PARTICLES_PER_TICK) {

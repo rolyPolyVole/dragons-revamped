@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.DragonsRevamped
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
@@ -59,11 +60,13 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     private var stage = Stage.DIVE
     private var stageTicks = 0
+    private var target: ServerPlayer? = null
     private var destination = Vec3.ZERO
     private var shouldEnd = false
 
     override fun start(): Boolean {
         val player = LowDiveAttackType.groundedTargets(dragon).randomOrNull() ?: return false
+        target = player
         destination = hoverPointAbove(player)
 
         chargeTowards(destination)
@@ -101,6 +104,8 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             stage = Stage.LINGER
             stageTicks = 0
             restoreNormalPhase()
+
+            target?.let { DragonsRevamped.LOGGER.info("Low dive breath started; target {} is at y={}", it.scoreboardName, it.y) }
         }
     }
 

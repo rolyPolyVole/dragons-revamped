@@ -7,7 +7,6 @@
         "accessor.EnderDragonFightAccessor",
         "accessor.FallingBlockEntityInvoker",
         "accessor.RangedAttributeAccessor",
-        "dragon.CombatRulesMixin",
         "dragon.DragonHoldingPatternPhaseMixin",
         "dragon.DragonStrafePlayerPhaseMixin",
         "dragon.EndCrystalMixin",

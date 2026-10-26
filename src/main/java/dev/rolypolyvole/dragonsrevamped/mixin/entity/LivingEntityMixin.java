@@ -33,8 +33,8 @@ public abstract class LivingEntityMixin {
     }
 
     @WrapOperation(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void reduceDragonDurabilityDamage(LivingEntity entity, DamageSource source, float damage, Operation<Void> original) {
-        float durabilityDamage = source.getEntity() instanceof EnderDragon ? damage * DRAGON_DURABILITY_DAMAGE : damage;
-        original.call(entity, source, durabilityDamage);
+    private void reduceDragonDurabilityDamage(LivingEntity entity, DamageSource damageSource, float damage, Operation<Void> original) {
+        float durabilityDamage = damageSource.getEntity() instanceof EnderDragon ? damage * DRAGON_DURABILITY_DAMAGE : damage;
+        original.call(entity, damageSource, durabilityDamage);
     }
 }

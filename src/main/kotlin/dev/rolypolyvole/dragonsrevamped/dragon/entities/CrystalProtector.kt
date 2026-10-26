@@ -25,9 +25,9 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim
 import net.minecraft.world.item.equipment.trim.TrimMaterials
 import net.minecraft.world.item.equipment.trim.TrimPatterns
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.Vec3
 import net.minecraft.world.level.block.entity.BannerPatternLayers
 import net.minecraft.world.level.block.entity.BannerPatterns
+import net.minecraft.world.phys.Vec3
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -78,7 +78,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
         val crystal = OrbitCrystal(serverLevel).apply {
             setShowBottom(false)
-            setPermanentlyInvulnerable(true)
+            isPermanentlyInvulnerable = true
             setPos(this@CrystalProtector.position())
         }
 
@@ -281,7 +281,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
             if (detonationTicks-- == 0) {
                 val cause = detonatedBy ?: return
-                setPermanentlyInvulnerable(false)
+                isPermanentlyInvulnerable = false
                 hurtServer(serverLevel, damageSources().mobAttack(cause), 1.0F)
                 return
             }

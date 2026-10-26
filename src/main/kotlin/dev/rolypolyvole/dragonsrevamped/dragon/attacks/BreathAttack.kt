@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
 import kotlin.reflect.KClass
 
-class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
+class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object LowDiveAttackType : DragonAttackType {
         override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
@@ -33,11 +33,11 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         )
 
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
-            return super.canStart(dragon, lastAttack) && lastAttack !is LowDiveAttack && groundedTargets(dragon).isNotEmpty()
+            return super.canStart(dragon, lastAttack) && lastAttack !is BreathAttack && groundedTargets(dragon).isNotEmpty()
         }
 
         override fun create(dragon: EnderDragon): AbstractDragonAttack {
-            return LowDiveAttack(dragon)
+            return BreathAttack(dragon)
         }
 
         fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {

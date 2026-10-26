@@ -15,7 +15,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         List(12) { ChargeAttack.ChargeAttackType },
         List(5) { FireballAttack.FireballAttackType },
         List(3) { LightningAttack.LightningAttackType },
-        List(4) { LowDiveAttack.LowDiveAttackType },
+        List(4) { BreathAttack.LowDiveAttackType },
         List(fighters.coerceAtMost(4)) { EnragedChargeAttack.EnragedChargeAttackType }
     ).flatten()
 
@@ -26,10 +26,8 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     private var ticksUntilRoar = nextRoarDelay()
     private var returningToCenter = false
 
-    val speedMultiplier: Float
-        get() = currentAttack?.getSpeedMultiplier() ?: 1.0F
-    val turnSpeedMultiplier: Float
-        get() = currentAttack?.getTurnSpeedMultiplier() ?: 1.0F
+    val speedMultiplier: Float; get() = currentAttack?.getSpeedMultiplier() ?: 1.0F
+    val turnSpeedMultiplier: Float; get() = currentAttack?.getTurnSpeedMultiplier() ?: 1.0F
 
     fun tick() {
         tickRoar()

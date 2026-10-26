@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.entities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.standingBlockPos
 import net.minecraft.core.component.DataComponents
@@ -224,7 +225,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         if (result && player != null) {
-            val message = Text.parse("<dark_aqua>❤ Protector Health: ${health.roundToInt()}")
+            val message = Text.parse(ModConfig.current.messages.protectorHealth, Text.placeholder("health", health.roundToInt()))
             player.sendSystemMessage(message, true)
         }
 

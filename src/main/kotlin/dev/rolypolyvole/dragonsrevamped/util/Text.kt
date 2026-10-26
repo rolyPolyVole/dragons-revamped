@@ -14,5 +14,9 @@ object Text {
     @JvmStatic
     fun parse(text: String, vararg tags: TagResolver): Component = serializer.serialize(miniMessage.deserialize(text, *tags))
 
+    @JvmStatic
     fun placeholder(name: String, component: Component): TagResolver = Placeholder.component(name, serializer.deserialize(component))
+
+    @JvmStatic
+    fun placeholder(name: String, value: Any): TagResolver = Placeholder.unparsed(name, value.toString())
 }

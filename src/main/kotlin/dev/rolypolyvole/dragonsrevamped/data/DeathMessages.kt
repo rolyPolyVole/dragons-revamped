@@ -11,11 +11,11 @@ object DeathMessages {
     @JvmStatic
     fun forDeath(player: ServerPlayer, source: DamageSource): Component? {
         val attacker = source.directEntity ?: return null
-        val messages = ModConfig.current.deathMessages
+        val messages = ModConfig.current.messages
 
         val template = when {
-            source.`is`(DragonDamageTypes.DRAGON_LIGHTNING) -> messages.lightning
-            source.`is`(DragonDamageTypes.DRAGON_BODY_HIT) -> messages.bodyHit
+            source.`is`(DragonDamageTypes.DRAGON_LIGHTNING) -> messages.lightningKill
+            source.`is`(DragonDamageTypes.DRAGON_BODY_HIT) -> messages.bodyKill
             else -> return null
         }
 

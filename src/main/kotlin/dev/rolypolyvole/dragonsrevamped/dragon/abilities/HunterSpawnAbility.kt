@@ -70,7 +70,7 @@ class HunterSpawnAbility(
             1
         )
 
-        dragon.broadcastMessage(Text.parse("<dark_purple>A Crystal Protector joins the battle!"))
+        dragon.broadcastMessage(Text.parse(ModConfig.current.messages.protectorJoined))
 
         manager.crystalRespawnAbility.sendCrystalCount()
     }

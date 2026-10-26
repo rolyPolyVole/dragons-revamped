@@ -221,7 +221,7 @@ class DragonRageAbility(
             }
 
             dragon.broadcastMessage(
-                Text.parse("<dark_purple>[Ender Dragon]</dark_purple> <white>My strongest soldiers have arrived to end this battle!")
+                Text.parse(ModConfig.current.messages.rageAnnouncement, Text.placeholder("dragon", dragon.displayName))
             )
         }
 

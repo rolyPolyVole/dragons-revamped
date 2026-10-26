@@ -71,7 +71,7 @@ class CrystalRespawnAbility(
         val crystal = Crystals.respawn(level, pos) ?: return false
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
-        dragon.broadcastMessage(Text.parse("<light_purple>An End Crystal has respawned!"))
+        dragon.broadcastMessage(Text.parse(ModConfig.current.messages.crystalRespawned))
         sendCrystalCount()
         return true
     }
@@ -103,8 +103,7 @@ class CrystalRespawnAbility(
     }
 
     fun sendCrystalCount() {
-        val count = getTotalCrystals()
-        val message = Text.parse("<dark_purple>✦ Crystals Remaining: $count")
+        val message = Text.parse(ModConfig.current.messages.crystalsRemaining, Text.placeholder("count", getTotalCrystals()))
 
         dragon.broadcastMessage(message, true)
     }

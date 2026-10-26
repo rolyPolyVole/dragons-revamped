@@ -5,13 +5,14 @@ import kotlin.math.sqrt
 
 class DragonConfig(
     val playerCount: Int = 1,
+    val dragonName: String = "<light_purple>Ender Dragon</light_purple>",
     val dragon: DragonSettings = DragonSettings(),
     val healing: HealingConfig = HealingConfig(),
     val crystals: CrystalConfig = CrystalConfig(),
     val crystalProtectors: CrystalProtectorConfig = CrystalProtectorConfig(),
     val damage: DamageConfig = DamageConfig(),
     val misc: MiscConfig = MiscConfig(),
-    val deathMessages: DeathMessageConfig = DeathMessageConfig()
+    val messages: MessageConfig = MessageConfig()
 ) {
     val fighters: Int
         get() = playerCount.coerceAtLeast(1)
@@ -76,7 +77,14 @@ class MiscConfig(
     val endermiteChance: Double = 0.5
 )
 
-class DeathMessageConfig(
-    val lightning: String = "<player> was struck down by <dragon>",
-    val bodyHit: String = "<player> got run through by <dragon>"
+class MessageConfig(
+    val lightningKill: String = "<player> was struck down by <dragon>",
+    val bodyKill: String = "<player> got run through by <dragon>",
+    val rageAnnouncement: String = "<dark_purple>[<dragon>]</dark_purple> <white>My strongest soldiers have arrived to end this battle!</white>",
+    val crystalRespawned: String = "<light_purple>An End Crystal has respawned!</light_purple>",
+    val protectorJoined: String = "<dark_purple>A Crystal Protector joins the battle!</dark_purple>",
+    val crystalIsProtected: String = "<light_purple>This crystal is guarded by a nearby Crystal Protector!</light_purple>",
+    val crystalsRemaining: String = "<dark_purple>✦ Crystals Remaining: <count></dark_purple>",
+    val dragonHealth: String = "<red>❤ Dragon Health: <health></red>",
+    val protectorHealth: String = "<dark_aqua>❤ Protector Health: <health></dark_aqua>"
 )

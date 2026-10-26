@@ -91,7 +91,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(EntityType<? extends EnderDragon> type, Level level, CallbackInfo ci) {
-        setCustomName(Text.parse("<light_purple>Ender Dragon"));
+        applyConfiguredName();
 
         var maxHealth = ((RangedAttributeAccessor) getAttribute(Attributes.MAX_HEALTH).getAttribute().value());
         maxHealth.setMaxValue(Double.MAX_VALUE);
@@ -136,6 +136,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (firstTick && abilityManager != null) {
             firstTick = false;
+            applyConfiguredName();
             applyConfiguredMaxHealth();
             phaseManager.setPhase(EnderDragonPhase.HOLDING_PATTERN);
         }
@@ -152,6 +153,11 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         }
 
         if (shouldTickAttacks()) attackManager.onBeforeMove();
+    }
+
+    @Unique
+    private void applyConfiguredName() {
+        setCustomName(Text.parse(ModConfig.getCurrent().getDragonName()));
     }
 
     @Unique
@@ -225,7 +231,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
-            Component message = Text.parse("<red>❤ Dragon Health: " + health);
+            Component message = Text.parse(ModConfig.getCurrent().getMessages().getDragonHealth(), Text.placeholder("health", health));
 
             player.sendSystemMessage(message, true);
         }

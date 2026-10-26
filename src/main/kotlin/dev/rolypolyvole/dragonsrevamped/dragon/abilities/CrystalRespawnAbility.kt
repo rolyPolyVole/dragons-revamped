@@ -1,9 +1,9 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
-import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
@@ -32,14 +32,14 @@ class CrystalRespawnAbility(
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = dragon.nearbyPlayers().size.coerceAtLeast(1)
+        val config = ModConfig.current
         val crystals = getTotalCrystals()
 
         val min = 400
-        val scaled = (1200 / sqrt(playerCount.toDouble())).toInt()
+        val scaled = 1200 / sqrt(config.fighters.toDouble())
         val extra = crystals * 150
 
-        return min + scaled + extra
+        return ((min + scaled + extra) / config.crystalRespawnRate).toInt()
     }
 
     override fun tick() {

@@ -1,7 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
-import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
@@ -34,8 +34,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var shouldEnd = false
 
     override fun start(): Boolean {
-        val playerCount = dragon.nearbyPlayers().size
-        chargesRemaining = 4.coerceAtLeast(playerCount)
+        chargesRemaining = 4.coerceAtLeast(ModConfig.current.fighters)
 
         return startNextCharge()
     }

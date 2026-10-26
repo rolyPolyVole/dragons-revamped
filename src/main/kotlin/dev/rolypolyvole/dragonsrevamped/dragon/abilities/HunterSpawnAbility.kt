@@ -1,10 +1,10 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
-import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
@@ -24,12 +24,12 @@ class HunterSpawnAbility(
     private var cooldown = calculateCooldown()
 
     private fun calculateCooldown(): Int {
-        val playerCount = dragon.nearbyPlayers().size.coerceAtLeast(1)
+        val config = ModConfig.current
 
         val base = (1200..1500).random()
-        val scaled = (1200 / sqrt(playerCount.toDouble())).toInt()
+        val scaled = 1200 / sqrt(config.fighters.toDouble())
 
-        return base + scaled
+        return ((base + scaled) / config.crystalProtectorSpawnRate).toInt()
     }
 
     override fun tick() {

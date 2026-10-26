@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +20,10 @@ public abstract class EnderDragonFightMixin {
 
     @Inject(method = "init", at = @At("RETURN"))
     private void customizeBossBar(ServerLevel level, long seed, BlockPos origin, CallbackInfo ci) {
-        dragonEvent.setCreateWorldFog(false);
+        if (ModConfig.getCurrent().getDisableFog()) {
+            dragonEvent.setCreateWorldFog(false);
+        }
+
         dragonEvent.setOverlay(BossEvent.BossBarOverlay.NOTCHED_6);
     }
 }

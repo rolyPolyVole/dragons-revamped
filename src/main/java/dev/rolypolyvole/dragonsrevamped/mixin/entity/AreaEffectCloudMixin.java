@@ -1,6 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.mixin.entity;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
@@ -68,7 +69,7 @@ public abstract class AreaEffectCloudMixin extends Entity {
 
     @Inject(method = "serverTick", at = @At("HEAD"))
     private void corrodeItems(ServerLevel serverLevel, CallbackInfo ci) {
-        if (!(getOwner() instanceof EnderDragon)) return;
+        if (!(getOwner() instanceof EnderDragon) || !ModConfig.getCurrent().getDragonBreathErodesItems()) return;
 
         float radius = getRadius();
         AABB aabb = getBoundingBox().inflate(radius, 2.0, radius);

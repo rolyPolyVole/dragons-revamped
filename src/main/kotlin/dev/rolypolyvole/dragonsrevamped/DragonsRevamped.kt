@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -17,6 +18,10 @@ class DragonsRevamped : ModInitializer {
     }
 
     override fun onInitialize() {
+        ModConfig.load()
+
+        ServerLifecycleEvents.SERVER_STARTING.register { ModConfig.load() }
+
         ServerLifecycleEvents.SERVER_STARTED.register { server ->
             server.getLevel(Level.END)?.let(CustomEndSpikes::placeInitialSpikes)
         }

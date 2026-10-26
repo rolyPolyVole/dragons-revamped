@@ -3,13 +3,14 @@ package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.mixin.accessor.RangedAttributeAccessor;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
-import dev.rolypolyvole.dragonsrevamped.util.ExtnKt;
 import kotlin.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -78,9 +79,6 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @Unique
     private boolean firstTick = true;
 
-    @Unique
-    private long lastPlayerCount = -1;
-
     protected EnderDragonMixin(EntityType<? extends Mob> entityType, Level level) {
         super(entityType, level);
     }
@@ -121,26 +119,13 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return attackManager != null && !abilityManager.getRageAbility().isActive() && getHealth() > 1.0F && finishedCooldown();
     }
 
-    @Unique
-    private long nearbyPlayerCount() {
-        return level().players().stream()
-            .filter(player -> ExtnKt.isInArena(self(), player))
-            .count();
-    }
-
-    @Inject(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/dimension/end/EnderDragonFight;updateDragon(Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;)V"))
-    private void beforeUpdateDragon(CallbackInfo info) {
-        if (getHealth() <= 1.0F) return;
-
-        updateMaxHealth();
-    }
-
     @Inject(method = "aiStep()V", at = @At("TAIL"))
     private void tick(CallbackInfo info) {
         if (getHealth() <= 1.0F) return;
 
-        if (firstTick) {
+        if (firstTick && abilityManager != null) {
             firstTick = false;
+            applyConfiguredMaxHealth();
             phaseManager.setPhase(EnderDragonPhase.HOLDING_PATTERN);
         }
 
@@ -159,22 +144,17 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Unique
-    private void updateMaxHealth() {
-        long playerCount = Math.max(nearbyPlayerCount(), 1);
-        if (playerCount == lastPlayerCount) return;
-        lastPlayerCount = playerCount;
-
-        double newMax = 800.0 + 700 * Math.sqrt(playerCount - 1);
-        float oldMax = getMaxHealth();
-        float healthPercent = getHealth() / oldMax;
+    private void applyConfiguredMaxHealth() {
+        double newMax = ModConfig.getCurrent().getMaxHealth();
+        float healthFraction = getHealth() / getMaxHealth();
 
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(newMax);
-        setHealth(healthPercent * (float) newMax);
+        setHealth(healthFraction * (float) newMax);
     }
 
     @Inject(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Ljava/util/List;)V", at = @At("HEAD"), cancellable = true)
     private void headAttack(ServerLevel serverLevel, List<Entity> list, CallbackInfo info) {
-        float damage = 14.0F;
+        float damage = ModConfig.getCurrent().getDamage().getHeadContact().forDifficulty(serverLevel.getDifficulty());
 
         for (Entity entity : list) {
             if (entity instanceof LivingEntity) {
@@ -189,7 +169,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Inject(method = "knockBack", at = @At("HEAD"), cancellable = true)
     private void wingAttack(ServerLevel serverLevel, List<Entity> list, CallbackInfo info) {
-        float damage = 8.0F;
+        float damage = ModConfig.getCurrent().getDamage().getWingContact().forDifficulty(serverLevel.getDifficulty());
 
         double centerX = (body.getBoundingBox().minX + body.getBoundingBox().maxX) / 2.0;
         double centerZ = (body.getBoundingBox().minZ + body.getBoundingBox().maxZ) / 2.0;
@@ -230,21 +210,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void customDamage(EnderDragon dragon, ServerLevel serverLevel, DamageSource source, float damage, Operation<Void> original) {
-        float adjusted = phaseManager.getCurrentPhase().onHurt(source, damageReceived);
-
-        float finalDamage = (hitPart == head || hitPart == neck)
-            ? adjusted * 2.0F
-            : adjusted;
-
-        if (source.is(DamageTypeTags.IS_EXPLOSION) && phaseManager.getCurrentPhase().getPhase() == EnderDragonPhase.LANDING) {
-            finalDamage *= 0.2F;
-        }
-
-        if (finalDamage > getMaxHealth() * 0.25F) {
-            finalDamage = getMaxHealth() * 0.25F;
-        }
-
-        original.call(dragon, serverLevel, source, finalDamage);
+        original.call(dragon, serverLevel, source, adjustDamage(source));
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
@@ -254,6 +220,25 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         }
     }
 
+    @Unique
+    private float adjustDamage(DamageSource source) {
+        float adjusted = phaseManager.getCurrentPhase().onHurt(source, damageReceived);
+
+        float damage = (hitPart == head || hitPart == neck)
+            ? adjusted * 2.0F
+            : adjusted;
+
+        if (source.is(DamageTypeTags.IS_EXPLOSION) && phaseManager.getCurrentPhase().getPhase() == EnderDragonPhase.LANDING) {
+            damage *= 0.2F;
+        }
+
+        if (ModConfig.getCurrent().getLimitMaxDamagePerHit()) {
+            damage = Math.min(damage, getMaxHealth() * 0.25F);
+        }
+
+        return damage;
+    }
+
     @ModifyConstant(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", constant = @Constant(floatValue = 0.25F))
     private float customTakeoffThreshold(float original) {
         return 0.15F;
@@ -261,12 +246,18 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @ModifyConstant(method = "checkCrystals()V", constant = @Constant(floatValue = 1.0F))
     private float customCrystalHeal(float original) {
+        DragonConfig config = ModConfig.getCurrent();
+        int fighters = config.getFighters();
         int ticksSinceLastHurt = tickCount - getLastHurtByMobTimestamp();
-        double playerCount = Math.max(nearbyPlayerCount(), 1);
-        int threshold = (int) (300 + 900 / Math.sqrt(playerCount));
+        int hyperHealDelay = (int) (300 + 900 / Math.sqrt(fighters));
 
-        return ticksSinceLastHurt > threshold ? getMaxHealth() * 0.01F : 1.0F + ((float) playerCount) * 0.1F;
+        if (config.getHyperHeal() && ticksSinceLastHurt > hyperHealDelay) {
+            return (float) (getMaxHealth() * 0.01F * config.getHyperHealRate());
+        }
+
+        return (float) ((1.0F + fighters * 0.1F) * config.getCrystalHealRate());
     }
+
 
     @ModifyExpressionValue(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
     private boolean ignoreHurtTime(boolean original) {

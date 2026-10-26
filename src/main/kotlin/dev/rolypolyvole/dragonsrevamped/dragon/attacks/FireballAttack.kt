@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.ExplosiveDragonFireball
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
@@ -40,7 +41,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var roarTicks = 0
     private var ticks = 0
 
-    private val minTargets = ceil(sqrt(dragon.nearbyPlayers().size.toDouble()))
+    private val minTargets = ceil(sqrt(ModConfig.current.fighters.toDouble()))
     private var ticksUntilChangeTarget = 0
     private var target: ServerPlayer? = null
 

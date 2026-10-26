@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
@@ -121,7 +122,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
 
         val source = DragonDamageTypes.dragonLightning(level, dragon)
-        player.hurtServer(level, source, 11.5f)
+        val damage = ModConfig.current.damage.lightning.forDifficulty(level.difficulty)
+        player.hurtServer(level, source, damage)
     }
 
     private fun playEffect() {

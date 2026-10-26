@@ -16,6 +16,6 @@ public abstract class DragonHoldingPatternPhaseMixin extends AbstractDragonPhase
 
     @ModifyArg(method = "findNewTarget(Lnet/minecraft/server/level/ServerLevel;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I", ordinal = 0))
     private int decreasePerchingChance(int bound) {
-        return Math.max(bound, 6);
+        return Math.max(bound, 5);
     }
 }

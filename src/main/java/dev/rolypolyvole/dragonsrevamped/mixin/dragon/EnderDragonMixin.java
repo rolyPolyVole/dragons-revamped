@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
+import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
@@ -269,9 +270,9 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         float speed = Math.max(1.0F, original.call(instance));
 
         if (instance.getPhase() == EnderDragonPhase.CHARGING_PLAYER) {
-            return speed * 2.4F;
+            return speed * 2.4F * DragonMovementKt.SPEED_MULTIPLIER;
         } else {
-            return speed * 1.7F;
+            return speed * 1.7F * DragonMovementKt.SPEED_MULTIPLIER;
         }
     }
 
@@ -282,7 +283,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @ModifyConstant(method = "aiStep()V", constant = @Constant(floatValue = 0.06F))
     private float forwardMovement(float original) {
-        return original * 1.7F * attackManager.getSpeedMultiplier();
+        return original * 1.7F * DragonMovementKt.SPEED_MULTIPLIER * attackManager.getSpeedMultiplier();
     }
 
     @WrapOperation(method = "checkWalls", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"))

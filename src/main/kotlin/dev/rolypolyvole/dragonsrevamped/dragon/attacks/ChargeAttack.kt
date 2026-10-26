@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.xz
@@ -91,11 +92,8 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             }
         }
 
-        val to = (targetLocation ?: return).subtract(dragon.position())
-        val movement = to.normalize()
         val speed = (if (resurfacing) 1.2 else 1.8) * chargeSpeedMultiplier
-
-        dragon.deltaMovement = movement.scale(speed)
+        dragon.flyTowards(targetLocation ?: return, speed)
     }
 
     override fun getTurnSpeedMultiplier(): Float {

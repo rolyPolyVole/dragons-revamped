@@ -2,6 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
@@ -38,9 +39,14 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var reachedOutpost = false
 
     private var ticks = 0
+    private var elapsedTicks = 0
     private var shouldEnd: Boolean = false
 
     override fun tick() {
+        if (elapsedTicks++ % 20 == 0) {
+            strikeDragon()
+        }
+
         if (!reachedOutpost) return
 
         if (ticks++ == 0) {
@@ -54,7 +60,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         if (ticks < 50) return
 
-        playEffect()
+        strikeDragon()
+        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
 
         dragon.nearbyPlayers()
             .filter(::isPlayerExposed)
@@ -69,17 +76,13 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return
         }
 
-        val delta = outpost.subtract(dragon.position())
-
-        if (delta.lengthSqr() < 256.0) {
+        if (outpost.distanceToSqr(dragon.position()) < 256.0) {
             reachedOutpost = true
             dragon.deltaMovement = Vec3.ZERO
             return
         }
 
-        val speed = 1.0
-        val direction = delta.normalize()
-        dragon.deltaMovement = direction.scale(speed)
+        dragon.flyTowards(outpost, 1.0)
     }
 
     override fun start(): Boolean {
@@ -126,13 +129,11 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         player.hurtServer(level, source, damage)
     }
 
-    private fun playEffect() {
+    private fun strikeDragon() {
         EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
             it.snapTo(dragon.position())
             it.setVisualOnly(true)
             level.addFreshEntity(it)
         }
-
-        dragon.broadcastSound(SoundEvents.LIGHTNING_BOLT_THUNDER, pitch = 0.8F + random * 0.3F)
     }
 }

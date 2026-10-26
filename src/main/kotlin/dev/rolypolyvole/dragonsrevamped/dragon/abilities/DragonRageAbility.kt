@@ -1,6 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
+import dev.rolypolyvole.dragonsrevamped.dragon.SPEED_MULTIPLIER
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
@@ -61,7 +62,7 @@ class DragonRageAbility(
             val direction = center.subtract(dragon.position())
 
             dragon.deltaMovement = if (direction.length() > 2.0) {
-                direction.normalize().scale(1.6)
+                direction.normalize().scale(1.6 * SPEED_MULTIPLIER)
             } else {
                 Vec3.ZERO
             }

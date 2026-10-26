@@ -2,13 +2,14 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.ExplosiveDragonFireball
+import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.dragon.turnTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.util.Mth
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.level.block.LevelEvent
@@ -93,7 +94,7 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return
         }
 
-        smoothLookAt(target.position())
+        dragon.turnTowards(target.position(), 9.0F)
 
         if (ticks % 20 == 0) {
             shootFireballAt(target.position())
@@ -106,17 +107,13 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return
         }
 
-        val delta = outpost.subtract(dragon.position())
-
-        if (delta.lengthSqr() < 256.0) {
+        if (outpost.distanceToSqr(dragon.position()) < 256.0) {
             reachedOutpost = true
             dragon.deltaMovement = Vec3.ZERO
             return
         }
 
-        val speed = 1.0
-        val direction = delta.normalize()
-        dragon.deltaMovement = direction.scale(speed)
+        dragon.flyTowards(outpost, 1.0)
     }
 
     override fun start(): Boolean {
@@ -140,13 +137,6 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             75.0 + random * 35.0,
             random * 100.0 - 50.0
         )
-    }
-
-    private fun smoothLookAt(targetPos: Vec3) {
-        val dx = targetPos.x - dragon.x
-        val dz = targetPos.z - dragon.z
-        val targetYaw = 180.0F - (atan2(dx, dz) * (180.0 / Math.PI)).toFloat()
-        dragon.yRot = Mth.approachDegrees(dragon.yRot, targetYaw, 9.0f)
     }
 
     private fun spawnMouthBreathParticles() {

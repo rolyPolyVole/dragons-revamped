@@ -8,6 +8,7 @@ import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals;
+import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.dragon.abilities.DragonRageAbility;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
@@ -128,7 +129,10 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     private void tick(CallbackInfo info) {
         if (getHealth() <= 1.0F) return;
 
-        if (abilityManager != null) DragonRageAbility.capHealth(self());
+        if (abilityManager != null) {
+            DragonRageAbility.capHealth(self());
+            DragonMovementKt.keepChunksTicking(self());
+        }
 
         if (firstTick && abilityManager != null) {
             firstTick = false;

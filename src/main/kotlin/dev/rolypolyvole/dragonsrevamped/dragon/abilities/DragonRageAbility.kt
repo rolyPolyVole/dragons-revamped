@@ -49,8 +49,7 @@ class DragonRageAbility(
         private set
 
     private var stateTicks = 0
-    var hasPerformed = false
-        private set
+    private var hasPerformed = false
     private var firstTick = true
 
     private val level = dragon.level() as ServerLevel
@@ -91,7 +90,8 @@ class DragonRageAbility(
 
             cleanBlockDisplays()
 
-            if (dragon.health <= dragon.maxHealth * 0.5f) {
+            if (hasRaged(dragon) || dragon.health <= dragon.maxHealth * 0.5f) {
+                dragon.addTag(RAGED_TAG)
                 hasPerformed = true
                 transition(State.DONE)
             }
@@ -102,6 +102,7 @@ class DragonRageAbility(
         if (hasPerformed) return
 
         if (dragon.health <= dragon.maxHealth * 0.5f) {
+            dragon.addTag(RAGED_TAG)
             transition(State.ASCENDING)
             dragon.phaseManager.setPhase(EnderDragonPhase.HOVERING)
         }
@@ -308,5 +309,16 @@ class DragonRageAbility(
 
     companion object {
         private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
+        private const val RAGED_TAG = "dragons_revamped_raged"
+        private const val HEALTH_CAP_FRACTION = 0.5F
+
+        @JvmStatic
+        fun hasRaged(dragon: EnderDragon): Boolean = RAGED_TAG in dragon.entityTags()
+
+        @JvmStatic
+        fun capHealth(dragon: EnderDragon) {
+            val cap = dragon.maxHealth * HEALTH_CAP_FRACTION
+            if (hasRaged(dragon) && dragon.health > cap) dragon.health = cap
+        }
     }
 }

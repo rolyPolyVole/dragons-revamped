@@ -9,6 +9,7 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
+import dev.rolypolyvole.dragonsrevamped.dragon.abilities.DragonRageAbility;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
@@ -127,6 +128,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @Inject(method = "aiStep()V", at = @At("TAIL"))
     private void tick(CallbackInfo info) {
         if (getHealth() <= 1.0F) return;
+
+        if (abilityManager != null) DragonRageAbility.capHealth(self());
 
         if (firstTick && abilityManager != null) {
             firstTick = false;
@@ -271,14 +274,6 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return (float) ((1.0F + fighters * 0.1F) * config.getCrystalHealRate());
     }
 
-    @WrapOperation(method = "checkCrystals()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;setHealth(F)V"))
-    private void capHealingAfterRage(EnderDragon dragon, float health, Operation<Void> original) {
-        if (abilityManager != null && abilityManager.getRageAbility().getHasPerformed()) {
-            health = Math.min(health, Math.max(getHealth(), getMaxHealth() * 0.5F));
-        }
-
-        original.call(dragon, health);
-    }
 
     @ModifyExpressionValue(method = "aiStep()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;wasHurtRecently()Z"))
     private boolean ignoreHurtTime(boolean original) {

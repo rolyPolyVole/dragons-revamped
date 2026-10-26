@@ -2,6 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import dev.rolypolyvole.dragonsrevamped.util.podiumY
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.TicketType
 import net.minecraft.util.Mth
@@ -12,7 +13,7 @@ import kotlin.math.atan2
 private const val MAX_ARENA_DISTANCE = 150.0
 private const val CHUNK_TICKET_INTERVAL = 10
 private const val CHUNK_TICKET_RADIUS = 3
-private const val MIN_HEIGHT_ABOVE_ORIGIN = 40.0
+private const val MAX_DEPTH_BELOW_PODIUM = 25
 
 fun EnderDragon.flyTowards(target: Vec3, speed: Double) {
     deltaMovement = target.subtract(position()).normalize().scale(speed * ModConfig.current.dragon.speedMultiplier)
@@ -36,5 +37,5 @@ fun EnderDragon.arenaCenter(height: Double): Vec3 = Vec3.atBottomCenterOf(fightO
 
 fun EnderDragon.isOffside(): Boolean {
     val horizontalDistance = position().multiply(1.0, 0.0, 1.0).distanceTo(arenaCenter(0.0).multiply(1.0, 0.0, 1.0))
-    return horizontalDistance > MAX_ARENA_DISTANCE || y < fightOrigin.y + MIN_HEIGHT_ABOVE_ORIGIN
+    return horizontalDistance > MAX_ARENA_DISTANCE || y < podiumY() - MAX_DEPTH_BELOW_PODIUM
 }

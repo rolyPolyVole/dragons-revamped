@@ -5,6 +5,7 @@ import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.Text
+import dev.rolypolyvole.dragonsrevamped.util.arenaBounds
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
 import net.minecraft.core.BlockPos
@@ -96,11 +97,8 @@ class CrystalRespawnAbility(
     }
 
     private fun getProtectorCrystals(): Int {
-        val center = Vec3.atCenterOf(dragon.fightOrigin)
-        val aabb = AABB.ofSize(center, 400.0, 400.0, 400.0)
-
         return level
-            .getEntitiesOfClass(CrystalProtector::class.java, aabb)
+            .getEntitiesOfClass(CrystalProtector::class.java, dragon.arenaBounds())
             .count(CrystalProtector::hasCrystal)
     }
 

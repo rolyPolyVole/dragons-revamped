@@ -6,6 +6,7 @@ import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import dev.rolypolyvole.dragonsrevamped.util.podiumY
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
@@ -17,7 +18,6 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.AreaEffectCloud
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
-import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
 
 class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
@@ -32,8 +32,7 @@ class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
 
         fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {
-            val origin = dragon.fightOrigin
-            val podiumY = dragon.level().getHeight(Heightmap.Types.MOTION_BLOCKING, origin.x, origin.z)
+            val podiumY = dragon.podiumY()
 
             return dragon.nearbyPlayers().filter {
                 !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y <= podiumY + MAX_HEIGHT_ABOVE_PODIUM

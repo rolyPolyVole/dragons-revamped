@@ -11,12 +11,25 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.level.levelgen.Heightmap
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
 const val ARENA_RADIUS = 200.0
 
 fun EnderDragon.isInArena(entity: Entity): Boolean =
-    entity.position().closerThan(Vec3.atCenterOf(fightOrigin), ARENA_RADIUS)
+    entity.position().xz().closerThan(Vec3.atCenterOf(fightOrigin).xz(), ARENA_RADIUS)
+
+fun EnderDragon.arenaBounds(): AABB {
+    val center = Vec3.atBottomCenterOf(fightOrigin)
+
+    return AABB(
+        center.x - ARENA_RADIUS, level().minY.toDouble(), center.z - ARENA_RADIUS,
+        center.x + ARENA_RADIUS, level().maxY + 1.0, center.z + ARENA_RADIUS
+    )
+}
+
+fun EnderDragon.podiumY(): Int =
+    level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, fightOrigin).y
 
 fun EnderDragon.nearbyPlayers(): List<ServerPlayer> =
     (level() as ServerLevel).players().filter { isInArena(it) }

@@ -4,6 +4,7 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.Text
+import dev.rolypolyvole.dragonsrevamped.util.arenaBounds
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
@@ -13,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import kotlin.math.sqrt
 
@@ -45,8 +45,7 @@ class HunterSpawnAbility(
     }
 
     private fun aliveHunters(): Int {
-        val area = AABB.ofSize(Vec3.atCenterOf(dragon.fightOrigin), 400.0, 400.0, 400.0)
-        return level.getEntitiesOfClass(CrystalProtector::class.java, area).count { it.isHunter && it.isAlive }
+        return level.getEntitiesOfClass(CrystalProtector::class.java, dragon.arenaBounds()).count { it.isHunter && it.isAlive }
     }
 
     private fun spawnHunter() {

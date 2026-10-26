@@ -15,6 +15,7 @@ import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.mixin.accessor.RangedAttributeAccessor;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
+import dev.rolypolyvole.dragonsrevamped.util.ExtnKt;
 import dev.rolypolyvole.dragonsrevamped.util.Text;
 import kotlin.Pair;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -330,8 +330,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (dragonDeathTime != 0) return;
 
-        Vec3 center = Vec3.atCenterOf(self().getFightOrigin());
-        AABB area = AABB.ofSize(center, 400.0, 400.0, 400.0);
+        AABB area = ExtnKt.arenaBounds(self());
 
         for (CrystalProtector protector : serverLevel.getEntitiesOfClass(CrystalProtector.class, area)) {
             protector.remove(RemovalReason.DISCARDED);

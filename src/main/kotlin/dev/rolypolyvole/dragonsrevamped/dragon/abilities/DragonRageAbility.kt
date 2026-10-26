@@ -307,7 +307,7 @@ class DragonRageAbility(
         private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
         private const val RAGED_TAG = "dragons_revamped_raged"
         private const val HEALTH_CAP_FRACTION = 0.5F
-        private const val BASE_RESPAWNED_CRYSTALS = 3
+        private const val BASE_RESPAWNED_CRYSTALS = 2
 
         @JvmStatic
         fun hasRaged(dragon: EnderDragon): Boolean = RAGED_TAG in dragon.entityTags()

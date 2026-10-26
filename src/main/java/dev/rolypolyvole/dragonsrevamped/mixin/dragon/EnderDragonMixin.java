@@ -376,6 +376,11 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "tickDeath", at = @At("HEAD"))
+    private void dropRemovedCrystalBeam(CallbackInfo ci) {
+        if (nearestCrystal != null && nearestCrystal.isRemoved()) nearestCrystal = null;
+    }
+
+    @Inject(method = "tickDeath", at = @At("HEAD"))
     private void onDeath(CallbackInfo ci) {
         if (!(level() instanceof ServerLevel serverLevel)) return;
 

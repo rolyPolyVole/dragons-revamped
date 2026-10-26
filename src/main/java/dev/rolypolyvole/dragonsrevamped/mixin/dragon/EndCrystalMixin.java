@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.util.Text;
-import net.kyori.adventure.text.ComponentLike;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -69,7 +68,7 @@ public abstract class EndCrystalMixin {
             Entity attacker = source.getEntity();
 
             if (attacker instanceof ServerPlayer player) {
-                player.sendActionBar((ComponentLike) Text.parse(ModConfig.getCurrent().getMessages().getCrystalIsProtected()));
+                player.sendSystemMessage(Text.parse(ModConfig.getCurrent().getMessages().getCrystalIsProtected()), true);
             }
 
             cir.setReturnValue(false);

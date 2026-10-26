@@ -186,7 +186,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         Vec3(player.x, player.blockPosition().highestBlockY(level).y + HOVER_HEIGHT, player.z)
 
     private companion object {
-        const val DIVE_SPEED = 1.8
+        const val DIVE_SPEED = 1.3
         const val HOVER_HEIGHT = 5.0
         const val ARRIVAL_DISTANCE = 4.0
         const val MAX_DIVE_TICKS = 200

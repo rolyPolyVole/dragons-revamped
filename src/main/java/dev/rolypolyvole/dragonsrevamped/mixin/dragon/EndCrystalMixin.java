@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;

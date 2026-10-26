@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.worldgen;
 
 import net.minecraft.world.level.levelgen.feature.EndSpikeFeature;
 import org.joml.Vector2d;

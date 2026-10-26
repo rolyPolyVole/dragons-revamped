@@ -1,6 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.util
 
-import dev.rolypolyvole.dragonsrevamped.mixin.FallingBlockEntityInvoker
+import dev.rolypolyvole.dragonsrevamped.mixin.accessor.FallingBlockEntityInvoker
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState

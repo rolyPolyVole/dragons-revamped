@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import net.minecraft.world.damagesource.CombatRules;

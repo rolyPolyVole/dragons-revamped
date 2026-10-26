@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.entity;
 
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.DragonSkeleton;
 import net.minecraft.server.level.ServerLevel;

@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerBossEvent;

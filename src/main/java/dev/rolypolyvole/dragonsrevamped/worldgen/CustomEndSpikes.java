@@ -1,7 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.worldgen;
 
 import dev.rolypolyvole.dragonsrevamped.DragonsRevamped;
-import dev.rolypolyvole.dragonsrevamped.mixin.EnderDragonFightAccessor;
+import dev.rolypolyvole.dragonsrevamped.mixin.accessor.EnderDragonFightAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;

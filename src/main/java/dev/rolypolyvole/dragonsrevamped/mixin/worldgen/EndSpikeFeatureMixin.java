@@ -1,4 +1,4 @@
-package dev.rolypolyvole.dragonsrevamped.mixin;
+package dev.rolypolyvole.dragonsrevamped.mixin.worldgen;
 
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes;
 import net.minecraft.util.RandomSource;

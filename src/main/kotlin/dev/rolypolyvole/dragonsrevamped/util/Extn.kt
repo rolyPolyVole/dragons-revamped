@@ -1,5 +1,6 @@
 package dev.rolypolyvole.dragonsrevamped.util
 
+import dev.rolypolyvole.dragonsrevamped.mixin.accessor.EnderDragonFightAccessor
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
 import net.minecraft.network.chat.Component
@@ -29,7 +30,8 @@ fun EnderDragon.arenaBounds(): AABB {
 }
 
 fun EnderDragon.podiumY(): Int =
-    level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, fightOrigin).y
+    (dragonFight as? EnderDragonFightAccessor)?.exitPortalLocation()?.y
+        ?: level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, fightOrigin).below().y
 
 fun EnderDragon.nearbyPlayers(): List<ServerPlayer> =
     (level() as ServerLevel).players().filter { isInArena(it) }

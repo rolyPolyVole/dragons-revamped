@@ -33,7 +33,7 @@ fun EnderDragon.keepChunksTicking() {
     (level() as ServerLevel).chunkSource.addTicketWithRadius(TicketType.ENDER_PEARL, chunkPosition(), CHUNK_TICKET_RADIUS)
 }
 
-fun EnderDragon.arenaCenter(height: Double): Vec3 = Vec3.atBottomCenterOf(fightOrigin).add(0.0, height, 0.0)
+fun EnderDragon.arenaCenter(height: Double): Vec3 = Vec3.atBottomCenterOf(fightOrigin).add(0.0, podiumY() + height, 0.0)
 
 fun EnderDragon.isOffside(): Boolean {
     val horizontalDistance = position().multiply(1.0, 0.0, 1.0).distanceTo(arenaCenter(0.0).multiply(1.0, 0.0, 1.0))

@@ -112,7 +112,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     private fun nextRoarDelay(): Int = (200..400).random()
 
     private companion object {
-        const val RETURN_HEIGHT = 80.0
+        const val RETURN_HEIGHT = 18.0
         const val RETURNED_DISTANCE = 40.0
     }
 }

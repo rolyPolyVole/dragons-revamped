@@ -2,6 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes
+import dev.rolypolyvole.dragonsrevamped.dragon.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
@@ -101,9 +102,9 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return Vec3.atCenterOf(dragon.fightOrigin).add(
+        return dragon.arenaCenter(54.0 + random * 35.0).add(
             random * 100.0 - 50.0,
-            115.0 + random * 35.0,
+            0.0,
             random * 100.0 - 50.0
         )
     }

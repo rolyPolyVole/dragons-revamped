@@ -2,6 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.ExplosiveDragonFireball
+import dev.rolypolyvole.dragonsrevamped.dragon.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.dragon.turnTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
@@ -128,9 +129,9 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return Vec3.atCenterOf(dragon.fightOrigin).add(
+        return dragon.arenaCenter(14.0 + random * 35.0).add(
             random * 100.0 - 50.0,
-            75.0 + random * 35.0,
+            0.0,
             random * 100.0 - 50.0
         )
     }

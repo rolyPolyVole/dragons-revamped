@@ -39,7 +39,7 @@ class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             }
         }
 
-        private const val MAX_HEIGHT_ABOVE_PODIUM = 12
+        private const val MAX_HEIGHT_ABOVE_PODIUM = 16
     }
 
     private enum class Stage {

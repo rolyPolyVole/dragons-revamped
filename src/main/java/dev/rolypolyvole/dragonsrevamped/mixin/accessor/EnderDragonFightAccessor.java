@@ -8,5 +8,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface EnderDragonFightAccessor {
 
     @Accessor("needsStateScanning")
-    boolean dragonsrevamped$needsStateScanning();
+    boolean needsStateScanning();
 }

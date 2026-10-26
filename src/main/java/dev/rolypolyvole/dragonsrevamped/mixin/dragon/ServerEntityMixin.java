@@ -18,7 +18,7 @@ public abstract class ServerEntityMixin {
     private Entity entity;
 
     @Inject(method = "sendChanges", at = @At("HEAD"))
-    private void keepHoveringDragonWingsCalm(CallbackInfo ci) {
+    private void preventInsaneWingFlaps(CallbackInfo ci) {
         if (!(entity instanceof EnderDragon dragon)) return;
         if (dragon.getPhaseManager().getCurrentPhase().getPhase() != EnderDragonPhase.HOVERING) return;
 

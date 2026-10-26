@@ -1,6 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.config
 
 import net.minecraft.world.Difficulty
+import kotlin.math.ceil
 import kotlin.math.sqrt
 
 class DragonConfig(
@@ -21,7 +22,7 @@ class DragonConfig(
         get() = dragon.healthOverride ?: (800.0 + 700.0 * sqrt(fighters - 1.0))
 
     val crystalProtectorLimit: Int
-        get() = crystalProtectors.maxAlive ?: fighters
+        get() = crystalProtectors.maxAlive ?: ceil(sqrt(fighters.toDouble())).toInt()
 }
 
 class DragonSettings(

@@ -5,7 +5,8 @@ import dev.rolypolyvole.dragonsrevamped.dragon.attacks.*
 import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.flyTowards
-import dev.rolypolyvole.dragonsrevamped.util.isOffside
+import dev.rolypolyvole.dragonsrevamped.util.isBelowArena
+import dev.rolypolyvole.dragonsrevamped.util.isOutsideArena
 import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
@@ -36,7 +37,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     fun tick() {
         tickRoar()
 
-        if (dragon.isOffside() && !returningToCenter) {
+        if (!returningToCenter && shouldReturnToCenter()) {
             startReturningToCenter()
         }
 
@@ -87,6 +88,9 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         currentAttack = null
         ticksUntilNextAttack = ((80..200).random() / sqrt(fighters.toDouble())).toInt()
     }
+
+    private fun shouldReturnToCenter(): Boolean =
+        dragon.isBelowArena() || (dragon.isOutsideArena() && currentAttack?.allowsReturnToCenter() != false)
 
     private fun startReturningToCenter() {
         currentAttack?.let(::finishAttack)

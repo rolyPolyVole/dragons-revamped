@@ -40,6 +40,8 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
     }
 
+    override fun allowsReturnToCenter(): Boolean = false
+
     override fun beforeMove() {
         val target = this.target
 

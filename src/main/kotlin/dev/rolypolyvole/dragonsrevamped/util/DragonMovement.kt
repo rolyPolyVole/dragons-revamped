@@ -33,7 +33,9 @@ fun EnderDragon.keepChunksTicking() {
 
 fun EnderDragon.arenaCenter(height: Double): Vec3 = Vec3.atBottomCenterOf(fightOrigin).add(0.0, podiumY() + height, 0.0)
 
-fun EnderDragon.isOffside(): Boolean {
+fun EnderDragon.isOutsideArena(): Boolean {
     val horizontalDistance = position().multiply(1.0, 0.0, 1.0).distanceTo(arenaCenter(0.0).multiply(1.0, 0.0, 1.0))
-    return horizontalDistance > MAX_ARENA_DISTANCE || y < podiumY() - MAX_DEPTH_BELOW_PODIUM
+    return horizontalDistance > MAX_ARENA_DISTANCE
 }
+
+fun EnderDragon.isBelowArena(): Boolean = y < podiumY() - MAX_DEPTH_BELOW_PODIUM

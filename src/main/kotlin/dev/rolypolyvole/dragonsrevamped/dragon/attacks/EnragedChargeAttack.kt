@@ -70,6 +70,8 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
     }
 
+    override fun allowsReturnToCenter(): Boolean = false
+
     override fun beforeMove() {
         currentCharge?.beforeMove()
     }

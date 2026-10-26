@@ -29,6 +29,7 @@ abstract class AbstractDragonAttack(protected val dragon: EnderDragon) {
     open fun getTurnSpeedMultiplier(): Float = 1.0f
 
     open fun allowsRoaring(): Boolean = true
+    open fun allowsReturnToCenter(): Boolean = true
 
     abstract fun shouldEnd(): Boolean
 

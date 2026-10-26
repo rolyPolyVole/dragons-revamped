@@ -267,6 +267,11 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return 0.15F;
     }
 
+    @ModifyExpressionValue(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/phases/DragonPhaseInstance;isSitting()Z"))
+    private boolean onlyTakeOffFromPerch(boolean sitting) {
+        return sitting && phaseManager.getCurrentPhase().getPhase() != EnderDragonPhase.HOVERING;
+    }
+
     @ModifyConstant(method = "checkCrystals()V", constant = @Constant(floatValue = 1.0F))
     private float customCrystalHeal(float original) {
         DragonConfig config = ModConfig.getCurrent();

@@ -24,7 +24,7 @@ class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var shouldEnd = false
 
     override fun start(): Boolean {
-        chargesRemaining = 4.coerceAtLeast(ModConfig.current.fighters)
+        chargesRemaining = ModConfig.current.fighters.coerceIn(4, 7)
 
         return startNextCharge()
     }

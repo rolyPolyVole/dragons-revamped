@@ -178,7 +178,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     private companion object {
         const val DIVE_SPEED = 1.8
-        const val HOVER_HEIGHT = 8.0
+        const val HOVER_HEIGHT = 5.0
         const val ARRIVAL_DISTANCE = 4.0
         const val MAX_DIVE_TICKS = 200
         const val LINGER_TICKS = 100

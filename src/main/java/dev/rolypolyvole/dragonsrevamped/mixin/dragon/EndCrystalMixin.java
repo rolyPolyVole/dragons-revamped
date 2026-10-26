@@ -52,12 +52,12 @@ public abstract class EndCrystalMixin {
     }
 
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    private void preventDamageIfGuarded(ServerLevel serverLevel, DamageSource damageSource, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void preventDamageIfGuarded(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
         EndCrystal self = self();
 
         if (self instanceof CrystalProtector.OrbitCrystal) return;
 
-        List<CrystalProtector> protectors = serverLevel.getEntitiesOfClass(
+        List<CrystalProtector> protectors = level.getEntitiesOfClass(
             CrystalProtector.class,
             self.getBoundingBox().inflate(12.0)
         );
@@ -65,7 +65,7 @@ public abstract class EndCrystalMixin {
         boolean guarded = protectors.stream().anyMatch(Entity::isAlive);
 
         if (guarded) {
-            Entity attacker = damageSource.getEntity();
+            Entity attacker = source.getEntity();
 
             if (attacker instanceof ServerPlayer player) {
                 player.sendSystemMessage(

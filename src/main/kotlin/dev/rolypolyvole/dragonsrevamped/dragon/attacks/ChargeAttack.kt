@@ -1,7 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.xz
@@ -9,22 +9,12 @@ import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
-import kotlin.reflect.KClass
 
 class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object ChargeAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonChargePlayerPhase::class,
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
-
         override fun create(dragon: EnderDragon): AbstractDragonAttack {
             return ChargeAttack(dragon)
         }
@@ -93,7 +83,7 @@ class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             }
         }
 
-        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.diveSpeedMultiplier) * chargeSpeedMultiplier
+        val speed = (if (resurfacing) 1.2 else 1.8 * ModConfig.current.dragon.diveSpeedMultiplier) * chargeSpeedMultiplier
         dragon.flyTowards(targetLocation ?: return, speed)
     }
 

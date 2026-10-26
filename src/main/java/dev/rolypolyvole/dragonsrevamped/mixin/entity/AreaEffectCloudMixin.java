@@ -69,7 +69,7 @@ public abstract class AreaEffectCloudMixin extends Entity {
 
     @Inject(method = "serverTick", at = @At("HEAD"))
     private void corrodeItems(ServerLevel serverLevel, CallbackInfo ci) {
-        if (!(getOwner() instanceof EnderDragon) || !ModConfig.getCurrent().getDragonBreathErodesItems()) return;
+        if (!(getOwner() instanceof EnderDragon) || !ModConfig.getCurrent().getMisc().getDragonBreathErodesItems()) return;
 
         float radius = getRadius();
         AABB aabb = getBoundingBox().inflate(radius, 2.0, radius);

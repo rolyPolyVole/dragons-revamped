@@ -4,11 +4,11 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.Text
+import dev.rolypolyvole.dragonsrevamped.util.arenaBounds
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
-import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
@@ -24,10 +24,12 @@ class CrystalRespawnAbility(
 
     private val level = dragon.level() as ServerLevel
 
+    /** Crystal location to remaining per-location cooldown ticks **/
     private val crystalLocations = CustomEndSpikes.getCrystalLocations(level)
         .associateWith { 0 }
         .toMutableMap()
 
+    /** Global cooldown **/
     private var cooldown = calculateCooldown()
     private var tooManyCrystals = false
 
@@ -39,7 +41,7 @@ class CrystalRespawnAbility(
         val scaled = 1200 / sqrt(config.fighters.toDouble())
         val extra = crystals * 150
 
-        return ((min + scaled + extra) / config.crystalRespawnRate).toInt()
+        return ((min + scaled + extra) / config.crystals.respawnRate).toInt()
     }
 
     override fun tick() {
@@ -48,33 +50,30 @@ class CrystalRespawnAbility(
         }
 
         if (dragon.tickCount % CRYSTAL_CHECK_INTERVAL == 0) {
-            tooManyCrystals = getTotalCrystals() >= ModConfig.current.crystalRespawnThreshold
+            tooManyCrystals = getTotalCrystals() >= ModConfig.current.crystals.respawnThreshold
         }
 
         if (tooManyCrystals) return
 
         if (cooldown > 0) {
             cooldown--
-        } else {
-            respawnCrystal()
+        } else if (respawnCrystal()) {
             cooldown = calculateCooldown()
         }
     }
 
-    private fun respawnCrystal() {
+    private fun respawnCrystal(): Boolean {
         val pos = crystalLocations
             .filter { it.value == 0 }.keys
             .filterNot(::doesCrystalExist)
-            .randomOrNull() ?: return
+            .randomOrNull() ?: return false
 
-        val crystal = Crystals.spawnRespawned(level, pos) ?: return
+        val crystal = Crystals.respawn(level, pos) ?: return false
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
-        dragon.broadcastMessage(
-            Component.literal("An End Crystal has respawned!").withColor(0xFF55FF)
-        )
-
+        dragon.broadcastMessage(Text.parse(ModConfig.current.messages.crystalRespawned))
         sendCrystalCount()
+        return true
     }
 
     fun doesCrystalExist(vec: Vec3): Boolean {
@@ -98,17 +97,13 @@ class CrystalRespawnAbility(
     }
 
     private fun getProtectorCrystals(): Int {
-        val center = Vec3.atCenterOf(dragon.fightOrigin)
-        val aabb = AABB.ofSize(center, 400.0, 400.0, 400.0)
-
         return level
-            .getEntitiesOfClass(CrystalProtector::class.java, aabb)
+            .getEntitiesOfClass(CrystalProtector::class.java, dragon.arenaBounds())
             .count(CrystalProtector::hasCrystal)
     }
 
     fun sendCrystalCount() {
-        val count = getTotalCrystals()
-        val message = Component.literal("✦ Crystals Remaining: $count").withStyle(ChatFormatting.DARK_PURPLE)
+        val message = Text.parse(ModConfig.current.messages.crystalsRemaining, Text.placeholder("count", getTotalCrystals()))
 
         dragon.broadcastMessage(message, true)
     }

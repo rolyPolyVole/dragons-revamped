@@ -3,16 +3,15 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
-import net.minecraft.ChatFormatting
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.Display
@@ -213,7 +212,7 @@ class DragonRageAbility(
         }
 
         if (stateTicks == 20) {
-            respawnAllCrystals()
+            respawnCrystals()
 
             EntityTypes.LIGHTNING_BOLT.create(level, EntitySpawnReason.MOB_SUMMONED)?.let {
                 it.snapTo(dragon.x, dragon.y, dragon.z)
@@ -222,9 +221,7 @@ class DragonRageAbility(
             }
 
             dragon.broadcastMessage(
-                Component.empty()
-                    .append(Component.literal("[Ender Dragon] ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(Component.literal("My strongest soldiers have arrived to end this battle!").withStyle(ChatFormatting.WHITE))
+                Text.parse(ModConfig.current.messages.rageAnnouncement, Text.placeholder("dragon", dragon.displayName))
             )
         }
 
@@ -281,9 +278,10 @@ class DragonRageAbility(
             .forEach { it.discard() }
     }
 
-    private fun respawnAllCrystals() {
-        val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }
-        val protectedSites = sites.take(ModConfig.current.crystalProtectorAmount)
+    private fun respawnCrystals() {
+        val config = ModConfig.current
+        val sites = CustomEndSpikes.getCrystalSites(level).shuffled().sortedByDescending { it.guarded }.take(BASE_RESPAWNED_CRYSTALS + config.fighters)
+        val protectedSites = sites.take(config.crystalProtectors.amountOnCrystals)
 
         for (site in sites) {
             val area = AABB.ofSize(site.position, 3.0, 3.0, 3.0)
@@ -291,7 +289,7 @@ class DragonRageAbility(
             level.getEntitiesOfClass(EndCrystal::class.java, area).forEach { it.discard() }
             level.getEntitiesOfClass(Skeleton::class.java, area).forEach { it.discard() }
 
-            val crystal = Crystals.spawnRespawned(level, site.position) ?: continue
+            val crystal = Crystals.respawn(level, site.position) ?: continue
             if (site !in protectedSites) continue
 
             val protector = CrystalProtector(level)
@@ -309,14 +307,19 @@ class DragonRageAbility(
         private const val RAGE_BLOCK_TAG = "dragons_revamped_rage_block"
         private const val RAGED_TAG = "dragons_revamped_raged"
         private const val HEALTH_CAP_FRACTION = 0.5F
+        private const val BASE_RESPAWNED_CRYSTALS = 3
 
         @JvmStatic
         fun hasRaged(dragon: EnderDragon): Boolean = RAGED_TAG in dragon.entityTags()
 
         @JvmStatic
+        fun healthCap(dragon: EnderDragon): Float =
+            if (hasRaged(dragon)) dragon.maxHealth * HEALTH_CAP_FRACTION else dragon.maxHealth
+
+        @JvmStatic
         fun capHealth(dragon: EnderDragon) {
-            val cap = dragon.maxHealth * HEALTH_CAP_FRACTION
-            if (hasRaged(dragon) && dragon.health > cap) dragon.health = cap
+            val cap = healthCap(dragon)
+            if (dragon.health > cap) dragon.health = cap
         }
     }
 }

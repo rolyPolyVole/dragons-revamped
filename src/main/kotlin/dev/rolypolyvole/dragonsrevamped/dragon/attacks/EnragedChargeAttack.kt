@@ -4,20 +4,10 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.entity.boss.enderdragon.phases.*
-import kotlin.reflect.KClass
 
 class EnragedChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object EnragedChargeAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonChargePlayerPhase::class,
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
-
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
             return super.canStart(dragon, lastAttack) && lastAttack !is EnragedChargeAttack
         }

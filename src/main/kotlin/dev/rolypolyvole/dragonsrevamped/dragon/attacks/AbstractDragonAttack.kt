@@ -2,8 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance
-import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase
+import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.phys.Vec3
 import kotlin.reflect.KClass
 
@@ -39,9 +38,15 @@ abstract class AbstractDragonAttack(protected val dragon: EnderDragon) {
 
 interface DragonAttackType {
     fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
-        return invalidPhases().none { it.isInstance(dragon.phaseManager.currentPhase) }
+        return validPhases().any { it.isInstance(dragon.phaseManager.currentPhase) }
     }
 
-    fun invalidPhases(): List<KClass<out DragonPhaseInstance>>
+    fun validPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
+        DragonHoldingPatternPhase::class,
+        DragonStrafePlayerPhase::class,
+        DragonTakeoffPhase::class,
+        DragonHoverPhase::class
+    )
+
     fun create(dragon: EnderDragon): AbstractDragonAttack
 }

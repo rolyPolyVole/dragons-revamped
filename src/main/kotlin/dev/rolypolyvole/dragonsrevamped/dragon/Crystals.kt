@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3
 object Crystals {
     private const val RESPAWNED_TAG = "dragons_revamped_respawned"
 
-    fun spawnRespawned(level: ServerLevel, position: Vec3): EndCrystal? {
+    fun respawn(level: ServerLevel, position: Vec3): EndCrystal? {
         val crystal = EntityTypes.END_CRYSTAL.create(level, EntitySpawnReason.EVENT) ?: return null
 
         crystal.setPos(position)
@@ -25,7 +25,7 @@ object Crystals {
     @JvmStatic
     fun damageToDragon(crystal: EndCrystal): Float {
         val config = ModConfig.current
-        val damage = if (isFresh(crystal)) config.initialCrystalDamage else config.respawnedCrystalDamage
+        val damage = if (isFresh(crystal)) config.crystals.initialDamage else config.crystals.respawnedDamage
         return damage.toFloat()
     }
 

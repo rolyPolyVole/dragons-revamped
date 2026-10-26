@@ -2,7 +2,11 @@ package dev.rolypolyvole.dragonsrevamped.dragon
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.attacks.*
+import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.isOffside
+import dev.rolypolyvole.dragonsrevamped.util.turnTowards
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase
@@ -15,7 +19,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
         List(12) { ChargeAttack.ChargeAttackType },
         List(5) { FireballAttack.FireballAttackType },
         List(3) { LightningAttack.LightningAttackType },
-        List(4) { LowDiveAttack.LowDiveAttackType },
+        List(4) { BreathAttack.LowDiveAttackType },
         List(fighters.coerceAtMost(4)) { EnragedChargeAttack.EnragedChargeAttackType }
     ).flatten()
 
@@ -26,10 +30,8 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     private var ticksUntilRoar = nextRoarDelay()
     private var returningToCenter = false
 
-    val speedMultiplier: Float
-        get() = currentAttack?.getSpeedMultiplier() ?: 1.0F
-    val turnSpeedMultiplier: Float
-        get() = currentAttack?.getTurnSpeedMultiplier() ?: 1.0F
+    val speedMultiplier: Float; get() = currentAttack?.getSpeedMultiplier() ?: 1.0F
+    val turnSpeedMultiplier: Float; get() = currentAttack?.getTurnSpeedMultiplier() ?: 1.0F
 
     fun tick() {
         tickRoar()
@@ -114,7 +116,7 @@ class DragonAttackManager(private val dragon: EnderDragon) {
     private fun nextRoarDelay(): Int = (200..400).random()
 
     private companion object {
-        const val RETURN_HEIGHT = 80.0
+        const val RETURN_HEIGHT = 18.0
         const val RETURNED_DISTANCE = 40.0
     }
 }

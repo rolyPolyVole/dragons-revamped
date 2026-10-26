@@ -10,7 +10,7 @@ plugins {
 version = providers.exec {
     commandLine("git", "describe", "--tags", "--always", "--dirty")
     isIgnoreExitValue = true
-}.standardOutput.asText.get().trim().ifEmpty { "unknown" }
+}.standardOutput.asText.get().trim().ifEmpty { "unknown" } + "+${project.property("minecraft_version")}"
 
 group = project.property("maven_group") as String
 

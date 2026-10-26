@@ -21,6 +21,7 @@ public abstract class ServerPlayerMixin extends Player {
         super(level, gameProfile);
     }
 
+    @SuppressWarnings("LocalMayUseName")
     @ModifyExpressionValue(method = "die(Lnet/minecraft/world/damagesource/DamageSource;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;getDeathMessage()Lnet/minecraft/network/chat/Component;"))
     private Component customDeathMessage(Component original, @Local(argsOnly = true) DamageSource damageSource) {
         return Objects.requireNonNullElse(DeathMessages.forDeath((ServerPlayer)(Object) this, damageSource), original);

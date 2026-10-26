@@ -37,13 +37,9 @@ object CustomEndSpikes {
             }
         }
 
-        val missing = EndSpikeFeature.getSpikesForLevel(end)
+        EndSpikeFeature.getSpikesForLevel(end)
             .filterNot { TipStructure.isBuilt(end, it.centerX, it.height, it.centerZ) }
-
-        missing.forEach { SpikeBuilder(end, it).build(crystalInvulnerable = false, crystalBeamTarget = null) }
-
-        if (missing.isNotEmpty()) {
-            DragonsRevamped.LOGGER.info("Placed {} End spikes", missing.size)
-        }
+            .also { if (it.isNotEmpty()) DragonsRevamped.LOGGER.info("Placed {} End spikes", it.size) }
+            .forEach { SpikeBuilder(end, it).build(crystalInvulnerable = false, crystalBeamTarget = null) }
     }
 }

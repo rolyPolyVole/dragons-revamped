@@ -3,17 +3,17 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.Text
+import dev.rolypolyvole.dragonsrevamped.util.arenaBounds
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import kotlin.math.sqrt
 
@@ -32,7 +32,7 @@ class HunterSpawnAbility(
         val base = (1200..1500).random()
         val scaled = 1200 / sqrt(config.fighters.toDouble())
 
-        return ((base + scaled) / config.crystalProtectorSpawnRate).toInt()
+        return ((base + scaled) / config.crystalProtectors.spawnRate).toInt()
     }
 
     override fun tick() {
@@ -45,8 +45,7 @@ class HunterSpawnAbility(
     }
 
     private fun aliveHunters(): Int {
-        val area = AABB.ofSize(Vec3.atCenterOf(dragon.fightOrigin), 400.0, 400.0, 400.0)
-        return level.getEntitiesOfClass(CrystalProtector::class.java, area).count { it.isHunter && it.isAlive }
+        return level.getEntitiesOfClass(CrystalProtector::class.java, dragon.arenaBounds()).count { it.isHunter && it.isAlive }
     }
 
     private fun spawnHunter() {
@@ -71,9 +70,7 @@ class HunterSpawnAbility(
             1
         )
 
-        dragon.broadcastMessage(
-            Component.literal("A Crystal Protector joins the battle!").withColor(0xAA00AA)
-        )
+        dragon.broadcastMessage(Text.parse(ModConfig.current.messages.protectorJoined))
 
         manager.crystalRespawnAbility.sendCrystalCount()
     }

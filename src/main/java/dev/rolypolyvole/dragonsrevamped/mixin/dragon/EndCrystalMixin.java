@@ -1,9 +1,9 @@
 package dev.rolypolyvole.dragonsrevamped.mixin.dragon;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import dev.rolypolyvole.dragonsrevamped.util.Text;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -52,12 +52,12 @@ public abstract class EndCrystalMixin {
     }
 
     @Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-    private void preventDamageIfGuarded(ServerLevel serverLevel, DamageSource damageSource, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void preventDamageIfGuarded(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
         EndCrystal self = self();
 
         if (self instanceof CrystalProtector.OrbitCrystal) return;
 
-        List<CrystalProtector> protectors = serverLevel.getEntitiesOfClass(
+        List<CrystalProtector> protectors = level.getEntitiesOfClass(
             CrystalProtector.class,
             self.getBoundingBox().inflate(12.0)
         );
@@ -65,13 +65,10 @@ public abstract class EndCrystalMixin {
         boolean guarded = protectors.stream().anyMatch(Entity::isAlive);
 
         if (guarded) {
-            Entity attacker = damageSource.getEntity();
+            Entity attacker = source.getEntity();
 
             if (attacker instanceof ServerPlayer player) {
-                player.sendSystemMessage(
-                    Component.literal("This crystal is guarded by a nearby Crystal Protector!").withStyle(ChatFormatting.LIGHT_PURPLE),
-                    false
-                );
+                player.sendSystemMessage(Text.parse(ModConfig.getCurrent().getMessages().getCrystalIsProtected()), true);
             }
 
             cir.setReturnValue(false);

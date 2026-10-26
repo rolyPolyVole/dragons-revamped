@@ -1,10 +1,10 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.entities
 
+import dev.rolypolyvole.dragonsrevamped.config.ModConfig
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.standingBlockPos
-import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -26,9 +26,9 @@ import net.minecraft.world.item.equipment.trim.ArmorTrim
 import net.minecraft.world.item.equipment.trim.TrimMaterials
 import net.minecraft.world.item.equipment.trim.TrimPatterns
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.Vec3
 import net.minecraft.world.level.block.entity.BannerPatternLayers
 import net.minecraft.world.level.block.entity.BannerPatterns
+import net.minecraft.world.phys.Vec3
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -52,7 +52,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
         health = maxHealth
 
-        customName = Component.literal("Crystal Protector").withStyle(ChatFormatting.DARK_PURPLE)
+        customName = Text.parse("<dark_purple>Crystal Protector")
         isCustomNameVisible = true
 
         EquipmentSlot.entries.forEach { setDropChance(it, 0f) }
@@ -79,7 +79,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
         val crystal = OrbitCrystal(serverLevel).apply {
             setShowBottom(false)
-            setPermanentlyInvulnerable(true)
+            isPermanentlyInvulnerable = true
             setPos(this@CrystalProtector.position())
         }
 
@@ -225,7 +225,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         if (result && player != null) {
-            val message = Component.literal("❤ Protector Health: ${health.roundToInt()}").withStyle(ChatFormatting.DARK_AQUA)
+            val message = Text.parse(ModConfig.current.messages.protectorHealth, Text.placeholder("health", health.roundToInt()))
             player.sendSystemMessage(message, true)
         }
 
@@ -282,7 +282,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
             if (detonationTicks-- == 0) {
                 val cause = detonatedBy ?: return
-                setPermanentlyInvulnerable(false)
+                isPermanentlyInvulnerable = false
                 hurtServer(serverLevel, damageSources().mobAttack(cause), 1.0F)
                 return
             }
@@ -307,7 +307,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         private companion object {
-            const val DETONATION_DELAY = 30
+            const val DETONATION_DELAY = 40
             const val SHAKE_DISTANCE = 0.3
         }
     }

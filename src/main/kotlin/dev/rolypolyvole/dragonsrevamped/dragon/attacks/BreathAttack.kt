@@ -2,10 +2,11 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.DragonsRevamped
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
+import dev.rolypolyvole.dragonsrevamped.util.podiumY
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
@@ -17,39 +18,30 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.AreaEffectCloud
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
-import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
-import kotlin.reflect.KClass
 
-class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
+class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object LowDiveAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonChargePlayerPhase::class,
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
-
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
-            return super.canStart(dragon, lastAttack) && lastAttack !is LowDiveAttack && groundedTargets(dragon).isNotEmpty()
+            return super.canStart(dragon, lastAttack) && lastAttack !is BreathAttack && groundedTargets(dragon).isNotEmpty()
         }
 
         override fun create(dragon: EnderDragon): AbstractDragonAttack {
-            return LowDiveAttack(dragon)
+            return BreathAttack(dragon)
         }
 
         fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {
-            val origin = dragon.fightOrigin
-            val podiumY = dragon.level().getHeight(Heightmap.Types.MOTION_BLOCKING, origin.x, origin.z)
+            val podiumY = dragon.podiumY()
+            val heightRange = (podiumY - MAX_DEPTH_BELOW_PODIUM).toDouble()..(podiumY + MAX_HEIGHT_ABOVE_PODIUM).toDouble()
 
             return dragon.nearbyPlayers().filter {
-                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y <= podiumY + MAX_HEIGHT_ABOVE_PODIUM
+                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y in heightRange
             }
         }
 
-        private const val MAX_HEIGHT_ABOVE_PODIUM = 12
+        private const val MAX_HEIGHT_ABOVE_PODIUM = 8
+        private const val MAX_DEPTH_BELOW_PODIUM = 16
     }
 
     private enum class Stage {
@@ -87,7 +79,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     override fun beforeMove() {
         when (stage) {
-            Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.diveSpeedMultiplier)
+            Stage.DIVE -> dragon.flyTowards(destination, DIVE_SPEED * ModConfig.current.dragon.diveSpeedMultiplier)
             Stage.LINGER -> limitClimbRate()
         }
     }

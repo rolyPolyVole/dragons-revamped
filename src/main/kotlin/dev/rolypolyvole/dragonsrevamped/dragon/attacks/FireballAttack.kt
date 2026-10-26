@@ -2,8 +2,9 @@ package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.ExplosiveDragonFireball
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
-import dev.rolypolyvole.dragonsrevamped.dragon.turnTowards
+import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.turnTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
@@ -20,12 +21,8 @@ import kotlin.reflect.KClass
 class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object FireballAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
+        override fun validPhases(): List<KClass<out DragonPhaseInstance>> =
+            super.validPhases() + DragonChargePlayerPhase::class
 
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
             return super.canStart(dragon, lastAttack) && lastAttack !is FireballAttack
@@ -132,9 +129,9 @@ class FireballAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     override fun shouldEnd(): Boolean = shouldEnd
 
     private fun getOutpostLocation(): Vec3 {
-        return Vec3.atCenterOf(dragon.fightOrigin).add(
+        return dragon.arenaCenter(14.0 + random * 35.0).add(
             random * 100.0 - 50.0,
-            75.0 + random * 35.0,
+            0.0,
             random * 100.0 - 50.0
         )
     }

@@ -12,7 +12,6 @@
         "dragon.EndCrystalMixin",
         "dragon.EnderDragonFightMixin",
         "dragon.EnderDragonMixin",
-        "dragon.ServerEntityMixin",
         "entity.AreaEffectCloudMixin",
         "entity.EndermanMixin",
         "entity.LivingEntityMixin",

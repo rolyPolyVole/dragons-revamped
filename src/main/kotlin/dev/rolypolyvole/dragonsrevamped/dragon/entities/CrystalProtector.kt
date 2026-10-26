@@ -306,7 +306,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         private companion object {
-            const val DETONATION_DELAY = 30
+            const val DETONATION_DELAY = 40
             const val SHAKE_DISTANCE = 0.3
         }
     }

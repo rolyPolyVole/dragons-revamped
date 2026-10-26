@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.AreaEffectCloud
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
+import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
 import kotlin.reflect.KClass
 
@@ -38,9 +39,16 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
             return LowDiveAttack(dragon)
         }
 
-        fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> = dragon.nearbyPlayers().filter {
-            !it.isCreative && !it.isSpectator && it.isAlive && it.onGround()
+        fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {
+            val origin = dragon.fightOrigin
+            val podiumY = dragon.level().getHeight(Heightmap.Types.MOTION_BLOCKING, origin.x, origin.z)
+
+            return dragon.nearbyPlayers().filter {
+                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y <= podiumY + MAX_HEIGHT_ABOVE_PODIUM
+            }
         }
+
+        private const val MAX_HEIGHT_ABOVE_PODIUM = 12
     }
 
     private enum class Stage {

@@ -11,7 +11,9 @@ import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +38,8 @@ public abstract class LivingEntityMixin {
     @WrapOperation(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void reduceDragonDurabilityDamage(LivingEntity entity, DamageSource damageSource, float damage, Operation<Void> original) {
         Entity attacker = damageSource.getEntity();
-        boolean fromDragonFight = attacker instanceof EnderDragon || attacker instanceof CrystalProtector;
+        boolean fromEndCrystal = damageSource.getDirectEntity() instanceof EndCrystal crystal && crystal.level().dimension() == Level.END;
+        boolean fromDragonFight = attacker instanceof EnderDragon || attacker instanceof CrystalProtector || fromEndCrystal;
         float durabilityDamage = fromDragonFight ? damage * DRAGON_DURABILITY_DAMAGE : damage;
         original.call(entity, damageSource, durabilityDamage);
     }

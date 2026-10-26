@@ -63,6 +63,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var target: ServerPlayer? = null
     private var destination = Vec3.ZERO
     private var shouldEnd = false
+    private var lastCloudPosition: Vec3? = null
 
     override fun start(): Boolean {
         val player = LowDiveAttackType.groundedTargets(dragon).randomOrNull() ?: return false
@@ -119,7 +120,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         pourBreath()
 
-        if (stageTicks % CLOUD_INTERVAL == CLOUD_DELAY) {
+        if (stageTicks >= CLOUD_DELAY) {
             spawnBreathCloud()
         }
     }
@@ -159,6 +160,10 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         val groundY = BlockPos.containing(mouth).highestBlockY(level).y
         if (groundY <= level.minY) return
 
+        val landing = Vec3(mouth.x, groundY.toDouble(), mouth.z)
+        if (lastCloudPosition?.let { it.distanceTo(landing) < CLOUD_SPACING } == true) return
+        lastCloudPosition = landing
+
         AreaEffectCloud(level, mouth.x, groundY.toDouble(), mouth.z).apply {
             owner = dragon
             setCustomParticle(breath)
@@ -191,7 +196,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         const val FALL_SPEED = 0.55
         const val FALL_SPEED_VARIATION = 0.35
 
-        const val CLOUD_INTERVAL = 40
+        const val CLOUD_SPACING = 8.0
         const val CLOUD_DELAY = 12
     }
 }

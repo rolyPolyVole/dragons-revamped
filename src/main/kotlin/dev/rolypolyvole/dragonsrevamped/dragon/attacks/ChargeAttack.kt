@@ -1,7 +1,7 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.attacks
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import dev.rolypolyvole.dragonsrevamped.util.xz

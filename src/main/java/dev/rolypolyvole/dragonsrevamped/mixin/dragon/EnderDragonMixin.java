@@ -8,12 +8,12 @@ import dev.rolypolyvole.dragonsrevamped.config.DragonConfig;
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig;
 import dev.rolypolyvole.dragonsrevamped.data.DragonDamageTypes;
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals;
-import dev.rolypolyvole.dragonsrevamped.dragon.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.dragon.abilities.DragonRageAbility;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.mixin.accessor.RangedAttributeAccessor;
+import dev.rolypolyvole.dragonsrevamped.util.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
 import dev.rolypolyvole.dragonsrevamped.util.ExtnKt;
 import dev.rolypolyvole.dragonsrevamped.util.Text;
@@ -90,7 +90,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onInit(EntityType<? extends EnderDragon> entityType, Level level, CallbackInfo ci) {
+    private void onInit(EntityType<? extends EnderDragon> type, Level level, CallbackInfo ci) {
         setCustomName(Text.parse("<light_purple>Ender Dragon"));
 
         var maxHealth = ((RangedAttributeAccessor) getAttribute(Attributes.MAX_HEALTH).getAttribute().value());
@@ -164,14 +164,14 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Ljava/util/List;)V", at = @At("HEAD"), cancellable = true)
-    private void headAttack(ServerLevel serverLevel, List<Entity> list, CallbackInfo info) {
-        float damage = ModConfig.getCurrent().getDamage().getHeadContact().forDifficulty(serverLevel.getDifficulty());
+    private void headAttack(ServerLevel level, List<Entity> entities, CallbackInfo info) {
+        float damage = ModConfig.getCurrent().getDamage().getHeadContact().forDifficulty(level.getDifficulty());
 
-        for (Entity entity : list) {
+        for (Entity entity : entities) {
             if (entity instanceof LivingEntity) {
-                DamageSource damageSource = DragonDamageTypes.dragonBodyHit(serverLevel, self());
-                entity.hurtServer(serverLevel, damageSource, damage);
-                EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+                DamageSource damageSource = DragonDamageTypes.dragonBodyHit(level, self());
+                entity.hurtServer(level, damageSource, damage);
+                EnchantmentHelper.doPostAttackEffects(level, entity, damageSource);
             }
         }
 
@@ -179,13 +179,13 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "knockBack", at = @At("HEAD"), cancellable = true)
-    private void wingAttack(ServerLevel serverLevel, List<Entity> list, CallbackInfo info) {
+    private void wingAttack(ServerLevel serverLevel, List<Entity> entities, CallbackInfo info) {
         float damage = ModConfig.getCurrent().getDamage().getWingContact().forDifficulty(serverLevel.getDifficulty());
 
         double centerX = (body.getBoundingBox().minX + body.getBoundingBox().maxX) / 2.0;
         double centerZ = (body.getBoundingBox().minZ + body.getBoundingBox().maxZ) / 2.0;
 
-        for (Entity entity : list) {
+        for (Entity entity : entities) {
             if (entity instanceof LivingEntity livingEntity) {
                 double dx = entity.getX() - centerX;
                 double dz = entity.getZ() - centerZ;
@@ -209,19 +209,19 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At("HEAD"), cancellable = true)
-    private void storeDamageData(ServerLevel level, EnderDragonPart part, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    private void storeDamageData(ServerLevel level, EnderDragonPart part, DamageSource source, float damage, CallbackInfoReturnable<Boolean> cir) {
         if (abilityManager != null && abilityManager.getRageAbility().isActive()) {
             cir.setReturnValue(false);
             return;
         }
 
         hitPart = part;
-        damageReceived = amount;
+        damageReceived = damage;
     }
 
     @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
-    private void customDamage(EnderDragon dragon, ServerLevel serverLevel, DamageSource source, float damage, Operation<Void> original) {
-        original.call(dragon, serverLevel, source, exactDamage ? damageReceived : adjustDamage(source));
+    private void customDamage(EnderDragon dragon, ServerLevel level, DamageSource source, float damage, Operation<Void> original) {
+        original.call(dragon, level, source, exactDamage ? damageReceived : adjustDamage(source));
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
@@ -313,12 +313,13 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return 128.0;
     }
 
+    @SuppressWarnings("LocalMayUseName")
     @WrapOperation(method = "onCrystalDestroyed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
-    private boolean crystalDamage(EnderDragon dragon, ServerLevel serverLevel, EnderDragonPart part, DamageSource source, float damage, Operation<Boolean> original, @Local(argsOnly = true) EndCrystal crystal) {
+    private boolean crystalDamage(EnderDragon dragon, ServerLevel level, EnderDragonPart part, DamageSource source, float damage, Operation<Boolean> original, @Local(argsOnly = true) EndCrystal crystal) {
         exactDamage = true;
 
         try {
-            return original.call(dragon, serverLevel, part, source, Crystals.damageToDragon(crystal));
+            return original.call(dragon, level, part, source, Crystals.damageToDragon(crystal));
         } finally {
             exactDamage = false;
         }
@@ -342,11 +343,11 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     }
 
     @Inject(method = "onCrystalDestroyed", at = @At("TAIL"))
-    private void onCrystalDestroyed(ServerLevel serverLevel, EndCrystal endCrystal, BlockPos blockPos, DamageSource damageSource, CallbackInfo ci) {
+    private void onCrystalDestroyed(ServerLevel level, EndCrystal crystal, BlockPos pos, DamageSource source, CallbackInfo ci) {
         if (abilityManager == null) return;
 
-        if (!(endCrystal instanceof CrystalProtector.OrbitCrystal)) {
-            abilityManager.getCrystalRespawnAbility().onCrystalDestroyed(blockPos);
+        if (!(crystal instanceof CrystalProtector.OrbitCrystal)) {
+            abilityManager.getCrystalRespawnAbility().onCrystalDestroyed(pos);
         }
 
         abilityManager.getCrystalRespawnAbility().sendCrystalCount();

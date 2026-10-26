@@ -1,8 +1,6 @@
-package dev.rolypolyvole.dragonsrevamped.dragon
+package dev.rolypolyvole.dragonsrevamped.util
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
-import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
-import dev.rolypolyvole.dragonsrevamped.util.podiumY
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.TicketType
 import net.minecraft.util.Mth

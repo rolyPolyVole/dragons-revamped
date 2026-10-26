@@ -69,7 +69,7 @@ class SpikeBuilder(private val level: ServerLevelAccessor, private val spike: En
             for (dy in -radius..radius) {
                 for (dz in -radius..radius) {
                     val distanceSqr = (dx * dx + dy * dy + dz * dz).toFloat()
-                    if (distanceSqr < innerRadiusSqr || distanceSqr > outerRadiusSqr) continue
+                    if (distanceSqr !in innerRadiusSqr..outerRadiusSqr) continue
 
                     pos.set(shape.tipX + dx, shape.crystalY + dy, shape.tipZ + dz)
 
@@ -84,8 +84,8 @@ class SpikeBuilder(private val level: ServerLevelAccessor, private val spike: En
     private fun spawnCrystal(invulnerable: Boolean, beamTarget: BlockPos?) {
         val crystal = EntityTypes.END_CRYSTAL.create(level.level, EntitySpawnReason.STRUCTURE) ?: return
 
-        crystal.setBeamTarget(beamTarget)
-        crystal.setPermanentlyInvulnerable(invulnerable)
+        crystal.beamTarget = beamTarget
+        crystal.isPermanentlyInvulnerable = invulnerable
         crystal.setShowBottom(false)
         crystal.snapTo(shape.tipX + 0.5, shape.crystalY.toDouble(), shape.tipZ + 0.5, random.nextFloat() * 360.0F, 0.0F)
 

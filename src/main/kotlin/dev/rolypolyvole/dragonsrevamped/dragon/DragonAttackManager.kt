@@ -2,7 +2,11 @@ package dev.rolypolyvole.dragonsrevamped.dragon
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.attacks.*
+import dev.rolypolyvole.dragonsrevamped.util.arenaCenter
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.isOffside
+import dev.rolypolyvole.dragonsrevamped.util.turnTowards
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase

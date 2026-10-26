@@ -4,7 +4,7 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
-import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
+import dev.rolypolyvole.dragonsrevamped.util.flyTowards
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
 import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage

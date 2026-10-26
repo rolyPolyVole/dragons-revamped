@@ -15,8 +15,8 @@ import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
 import dev.rolypolyvole.dragonsrevamped.mixin.accessor.RangedAttributeAccessor;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
+import dev.rolypolyvole.dragonsrevamped.util.Text;
 import kotlin.Pair;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -91,7 +91,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onInit(EntityType<? extends EnderDragon> entityType, Level level, CallbackInfo ci) {
-        setCustomName(Component.literal("Ender Dragon").withStyle(ChatFormatting.LIGHT_PURPLE));
+        setCustomName(Text.parse("<light_purple>Ender Dragon"));
 
         var maxHealth = ((RangedAttributeAccessor) getAttribute(Attributes.MAX_HEALTH).getAttribute().value());
         maxHealth.setMaxValue(Double.MAX_VALUE);
@@ -225,7 +225,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());
-            Component message = Component.literal("❤ Dragon Health: " + health).withStyle(ChatFormatting.RED);
+            Component message = Text.parse("<red>❤ Dragon Health: " + health);
 
             player.sendSystemMessage(message, true);
         }

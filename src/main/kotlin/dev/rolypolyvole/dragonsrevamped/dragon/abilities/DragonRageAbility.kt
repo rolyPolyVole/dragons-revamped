@@ -6,13 +6,12 @@ import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.flyTowards
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
-import net.minecraft.ChatFormatting
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.particles.PowerParticleOption
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.Display
@@ -222,9 +221,7 @@ class DragonRageAbility(
             }
 
             dragon.broadcastMessage(
-                Component.empty()
-                    .append(Component.literal("[Ender Dragon] ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(Component.literal("My strongest soldiers have arrived to end this battle!").withStyle(ChatFormatting.WHITE))
+                Text.parse("<dark_purple>[Ender Dragon]</dark_purple> <white>My strongest soldiers have arrived to end this battle!")
             )
         }
 

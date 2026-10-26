@@ -1,16 +1,12 @@
 package dev.rolypolyvole.dragonsrevamped.data
 
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
-import net.kyori.adventure.platform.modcommon.MinecraftServerAudiences
-import net.kyori.adventure.text.minimessage.MiniMessage
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.world.entity.Entity
 
 object DeathMessages {
-    private val miniMessage = MiniMessage.miniMessage()
 
     @JvmStatic
     fun forDeath(player: ServerPlayer, source: DamageSource): Component? {
@@ -23,18 +19,10 @@ object DeathMessages {
             else -> return null
         }
 
-        return format(template, player, attacker)
-    }
-
-    private fun format(template: String, player: ServerPlayer, attacker: Entity): Component {
-        val audiences = MinecraftServerAudiences.of(player.level().server)
-
-        val message = miniMessage.deserialize(
+        return Text.parse(
             template,
-            Placeholder.component("player", audiences.asAdventure(player.displayName)),
-            Placeholder.component("dragon", audiences.asAdventure(attacker.displayName))
+            Text.placeholder("player", player.displayName),
+            Text.placeholder("dragon", attacker.displayName)
         )
-
-        return audiences.asNative(message)
     }
 }

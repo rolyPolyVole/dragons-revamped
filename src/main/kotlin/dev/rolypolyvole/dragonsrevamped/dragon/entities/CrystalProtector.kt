@@ -1,10 +1,9 @@
 package dev.rolypolyvole.dragonsrevamped.dragon.entities
 
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.standingBlockPos
-import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -52,7 +51,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
 
         health = maxHealth
 
-        customName = Component.literal("Crystal Protector").withStyle(ChatFormatting.DARK_PURPLE)
+        customName = Text.parse("<dark_purple>Crystal Protector")
         isCustomNameVisible = true
 
         EquipmentSlot.entries.forEach { setDropChance(it, 0f) }
@@ -225,7 +224,7 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
         }
 
         if (result && player != null) {
-            val message = Component.literal("❤ Protector Health: ${health.roundToInt()}").withStyle(ChatFormatting.DARK_AQUA)
+            val message = Text.parse("<dark_aqua>❤ Protector Health: ${health.roundToInt()}")
             player.sendSystemMessage(message, true)
         }
 

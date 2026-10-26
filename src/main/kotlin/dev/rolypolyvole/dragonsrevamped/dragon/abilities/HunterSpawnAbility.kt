@@ -3,11 +3,11 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.highestBlockY
 import dev.rolypolyvole.dragonsrevamped.util.nearbyPlayers
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntitySpawnReason
@@ -72,7 +72,7 @@ class HunterSpawnAbility(
         )
 
         dragon.broadcastMessage(
-            Component.literal("A Crystal Protector joins the battle!").withColor(0xAA00AA)
+            Text.parse("<dark_purple>A Crystal Protector joins the battle!")
         )
 
         manager.crystalRespawnAbility.sendCrystalCount()

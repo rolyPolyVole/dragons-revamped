@@ -4,11 +4,10 @@ import dev.rolypolyvole.dragonsrevamped.config.ModConfig
 import dev.rolypolyvole.dragonsrevamped.dragon.Crystals
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.Text
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
-import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
@@ -71,7 +70,7 @@ class CrystalRespawnAbility(
         crystal.playSound(SoundEvents.BEACON_ACTIVATE)
 
         dragon.broadcastMessage(
-            Component.literal("An End Crystal has respawned!").withColor(0xFF55FF)
+            Text.parse("<light_purple>An End Crystal has respawned!")
         )
 
         sendCrystalCount()
@@ -108,7 +107,7 @@ class CrystalRespawnAbility(
 
     fun sendCrystalCount() {
         val count = getTotalCrystals()
-        val message = Component.literal("✦ Crystals Remaining: $count").withStyle(ChatFormatting.DARK_PURPLE)
+        val message = Text.parse("<dark_purple>✦ Crystals Remaining: $count")
 
         dragon.broadcastMessage(message, true)
     }

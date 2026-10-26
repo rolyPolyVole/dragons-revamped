@@ -9,7 +9,7 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.phys.Vec3
 import kotlin.math.atan2
 
-private const val MAX_ARENA_DISTANCE = 100.0
+private const val MAX_ARENA_DISTANCE = 150.0
 private const val CHUNK_TICKET_INTERVAL = 10
 private const val CHUNK_TICKET_RADIUS = 3
 private const val MIN_HEIGHT_ABOVE_ORIGIN = 40.0

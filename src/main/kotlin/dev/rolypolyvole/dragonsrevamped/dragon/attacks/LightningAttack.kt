@@ -18,6 +18,10 @@ import kotlin.reflect.KClass
 
 class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
+    private companion object {
+        const val STRIKE_INTERVAL = 30
+    }
+
     object LightningAttackType : DragonAttackType {
         override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
             DragonLandingApproachPhase::class,
@@ -43,7 +47,7 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     private var shouldEnd: Boolean = false
 
     override fun tick() {
-        if (elapsedTicks++ % 20 == 0) {
+        if (elapsedTicks++ % STRIKE_INTERVAL == 0) {
             strikeDragon()
         }
 

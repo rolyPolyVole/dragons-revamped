@@ -293,8 +293,6 @@ class CrystalProtector(level: Level) : DragonSkeleton(level) {
                 detonationCenter.z + (random.nextDouble() - 0.5) * SHAKE_DISTANCE
             )
 
-            if (detonationTicks % 10 == 0) playDepleteSound()
-
         }
 
         fun moveVisibly(x: Double, y: Double, z: Double) {

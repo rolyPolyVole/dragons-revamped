@@ -29,6 +29,10 @@ class WitherArrow(
     override fun tick() {
         super.tick()
 
+        if (deltaMovement.length() > MAX_SPEED) {
+            deltaMovement = deltaMovement.normalize().scale(MAX_SPEED)
+        }
+
         if (isInGround) return
 
         val level = level() as? ServerLevel ?: return
@@ -40,6 +44,10 @@ class WitherArrow(
             0.0, 0.0, 0.0,
             0.0
         )
+    }
+
+    companion object {
+        const val MAX_SPEED = 3.0
     }
 }
 

@@ -61,15 +61,14 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityTypes.SKELETON, level) 
 
         val level = level()
         if (level is ServerLevel) {
-            arrow.deltaMovement = computeExactVelocity(dx, dy, dz, 3.0)
+            arrow.deltaMovement = computeExactVelocity(dx, dy, dz)
             level.addFreshEntity(arrow)
         }
 
         playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (random.nextFloat() * 0.4F + 0.8F))
     }
 
-    @Suppress("SameParameterValue")
-    private fun computeExactVelocity(dx: Double, dy: Double, dz: Double, maxSpeed: Double): Vec3 {
+    private fun computeExactVelocity(dx: Double, dy: Double, dz: Double): Vec3 {
         val drag = 0.99
         val gravity = 0.05
 
@@ -79,12 +78,11 @@ open class DragonSkeleton(level: Level) : Skeleton(EntityTypes.SKELETON, level) 
             val vz = dz / s
             val vy = (dy + gravity / (1.0 - drag) * (n - s)) / s
             val v = sqrt(vx * vx + vy * vy + vz * vz)
-            if (v <= maxSpeed) {
+            if (v <= WitherArrow.MAX_SPEED) {
                 return Vec3(vx, vy, vz)
             }
         }
 
-        val s = (1.0 - drag.pow(1)) / (1.0 - drag)
-        return Vec3(dx / s, (dy + gravity / (1.0 - drag) * (1 - s)) / s, dz / s)
+        return Vec3(dx, dy, dz).normalize().scale(WitherArrow.MAX_SPEED)
     }
 }

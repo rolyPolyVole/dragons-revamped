@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class LivingEntityMixin {
 
     @Unique
-    private static final float DRAGON_DURABILITY_DAMAGE = 0.5F;
+    private static final float DRAGON_DURABILITY_DAMAGE = 0.25F;
 
     @WrapWithCondition(method = "stabAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
     private boolean keepCrystalProtectorsMounted(Entity target) {
@@ -35,7 +35,9 @@ public abstract class LivingEntityMixin {
 
     @WrapOperation(method = "getDamageAfterArmorAbsorb", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void reduceDragonDurabilityDamage(LivingEntity entity, DamageSource damageSource, float damage, Operation<Void> original) {
-        float durabilityDamage = damageSource.getEntity() instanceof EnderDragon ? damage * DRAGON_DURABILITY_DAMAGE : damage;
+        Entity attacker = damageSource.getEntity();
+        boolean fromDragonFight = attacker instanceof EnderDragon || attacker instanceof CrystalProtector;
+        float durabilityDamage = fromDragonFight ? damage * DRAGON_DURABILITY_DAMAGE : damage;
         original.call(entity, damageSource, durabilityDamage);
     }
 }

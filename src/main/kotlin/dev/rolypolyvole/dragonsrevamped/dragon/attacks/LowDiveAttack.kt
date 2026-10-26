@@ -175,7 +175,11 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         }
     }
 
-    private fun mouthPosition(): Vec3 = Vec3(dragon.head.x, dragon.head.getY(0.3), dragon.head.z)
+    private fun mouthPosition(): Vec3 {
+        val head = Vec3(dragon.head.x, dragon.head.getY(0.3), dragon.head.z)
+        val forward = head.subtract(dragon.position()).multiply(1.0, 0.0, 1.0).normalize()
+        return head.subtract(forward.scale(MOUTH_OFFSET))
+    }
 
     private fun hoverPointAbove(player: ServerPlayer): Vec3 =
         Vec3(player.x, player.blockPosition().highestBlockY(level).y + HOVER_HEIGHT, player.z)
@@ -190,6 +194,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         const val MAX_VERTICAL_SPEED = 0.08
 
         const val PARTICLES_PER_TICK = 50
+        const val MOUTH_OFFSET = 1.0
         const val POUR_WIDTH = 1.2
         const val SPREAD_SPEED = 0.12
         const val FALL_SPEED = 0.55

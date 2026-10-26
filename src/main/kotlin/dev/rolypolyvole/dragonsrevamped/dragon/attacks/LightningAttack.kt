@@ -23,12 +23,8 @@ class LightningAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
     }
 
     object LightningAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
+        override fun validPhases(): List<KClass<out DragonPhaseInstance>> =
+            super.validPhases() + DragonChargePlayerPhase::class
 
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
             return super.canStart(dragon, lastAttack) && lastAttack !is LightningAttack

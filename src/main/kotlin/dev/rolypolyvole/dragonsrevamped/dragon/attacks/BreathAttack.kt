@@ -19,19 +19,10 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
-import kotlin.reflect.KClass
 
 class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object LowDiveAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonChargePlayerPhase::class,
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
-
         override fun canStart(dragon: EnderDragon, lastAttack: AbstractDragonAttack?): Boolean {
             return super.canStart(dragon, lastAttack) && lastAttack !is BreathAttack && groundedTargets(dragon).isNotEmpty()
         }

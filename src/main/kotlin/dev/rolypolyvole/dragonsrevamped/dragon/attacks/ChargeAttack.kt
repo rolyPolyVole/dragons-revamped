@@ -9,22 +9,12 @@ import net.minecraft.commands.arguments.EntityAnchorArgument
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
-import net.minecraft.world.entity.boss.enderdragon.phases.*
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.Vec3
-import kotlin.reflect.KClass
 
 class ChargeAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
     object ChargeAttackType : DragonAttackType {
-        override fun invalidPhases(): List<KClass<out DragonPhaseInstance>> = listOf(
-            DragonChargePlayerPhase::class,
-            DragonLandingApproachPhase::class,
-            DragonLandingPhase::class,
-            DragonDeathPhase::class,
-            AbstractDragonSittingPhase::class
-        )
-
         override fun create(dragon: EnderDragon): AbstractDragonAttack {
             return ChargeAttack(dragon)
         }

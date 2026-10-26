@@ -250,14 +250,6 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         return damage;
     }
 
-    @Inject(method = "reallyHurt", at = @At("TAIL"))
-    private void keepWingsCalmWhileHovering(ServerLevel serverLevel, DamageSource source, float damage, CallbackInfo ci) {
-        if (phaseManager.getCurrentPhase().getPhase() != EnderDragonPhase.HOVERING) return;
-
-        needsSync = false;
-        syncVelocity = false;
-    }
-
     @ModifyConstant(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", constant = @Constant(floatValue = 0.25F))
     private float customTakeoffThreshold(float original) {
         return 0.15F;

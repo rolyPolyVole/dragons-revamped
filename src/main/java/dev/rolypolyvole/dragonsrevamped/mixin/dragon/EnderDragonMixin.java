@@ -52,7 +52,9 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(EnderDragon.class)
 @SuppressWarnings("DataFlowIssue")
@@ -86,6 +88,10 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     private DragonAbilityManager abilityManager;
     @Unique
     private boolean firstTick = true;
+    @Unique
+    private int hitTick = -1;
+    @Unique
+    private final Set<Object> hitSourcesThisTick = new HashSet<>();
     @Unique
     private boolean exactDamage;
 
@@ -227,6 +233,18 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
             return;
         }
 
+        if (tickCount != hitTick) {
+            hitTick = tickCount;
+            hitSourcesThisTick.clear();
+        }
+
+        Object hitSource = source.getDirectEntity() != null ? source.getDirectEntity() : source;
+
+        if (!hitSourcesThisTick.add(hitSource)) {
+            cir.setReturnValue(false);
+            return;
+        }
+
         hitPart = part;
         damageReceived = damage;
     }
@@ -234,6 +252,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @WrapOperation(method = "hurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/boss/enderdragon/EnderDragonPart;Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/boss/enderdragon/EnderDragon;reallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void customDamage(EnderDragon dragon, ServerLevel level, DamageSource source, float damage, Operation<Void> original) {
         original.call(dragon, level, source, exactDamage ? damageReceived : adjustDamage(source));
+        setInvulnerableTime(0);
 
         if (source.getEntity() instanceof ServerPlayer player) {
             int health = getHealth() <= 1.0F ? 0 : Math.round(getHealth());

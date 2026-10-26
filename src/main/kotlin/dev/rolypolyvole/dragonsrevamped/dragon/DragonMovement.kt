@@ -13,7 +13,7 @@ import kotlin.math.atan2
 private const val MAX_ARENA_DISTANCE = 150.0
 private const val CHUNK_TICKET_INTERVAL = 10
 private const val CHUNK_TICKET_RADIUS = 3
-private const val MAX_DEPTH_BELOW_PODIUM = 25
+private const val MAX_DEPTH_BELOW_PODIUM = 50
 
 fun EnderDragon.flyTowards(target: Vec3, speed: Double) {
     deltaMovement = target.subtract(position()).normalize().scale(speed * ModConfig.current.dragon.speedMultiplier)

@@ -2,6 +2,7 @@ package dev.rolypolyvole.dragonsrevamped.dragon.abilities
 
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector
+import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation
 import dev.rolypolyvole.dragonsrevamped.util.broadcastMessage
 import dev.rolypolyvole.dragonsrevamped.util.broadcastSound
 import dev.rolypolyvole.dragonsrevamped.worldgen.CustomEndSpikes
@@ -17,7 +18,6 @@ import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase
-import net.minecraft.world.entity.item.FallingBlockEntity
 import net.minecraft.world.entity.monster.skeleton.Skeleton
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
@@ -191,11 +191,7 @@ class DragonRageAbility(
             val speed = 1.0 + this.level.random.nextDouble() * 1.5
             val velocity = direction.scale(speed).add(0.0, 0.5 + this.level.random.nextDouble(), 0.0)
 
-            val falling = FallingBlockEntity.fall(this.level, display.blockPosition(), block.blockState)
-            falling.dropItem = false
-            falling.time = 1
-            falling.disableDrop()
-            falling.deltaMovement = velocity
+            ExplosionAnimation.spawnDebris(this.level, display.position(), block.blockState, velocity)
         }
 
         this.floatingBlocks.clear()

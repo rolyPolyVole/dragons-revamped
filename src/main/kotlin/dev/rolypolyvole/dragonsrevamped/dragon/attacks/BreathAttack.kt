@@ -33,13 +33,15 @@ class BreathAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
 
         fun groundedTargets(dragon: EnderDragon): List<ServerPlayer> {
             val podiumY = dragon.podiumY()
+            val heightRange = (podiumY - MAX_DEPTH_BELOW_PODIUM).toDouble()..(podiumY + MAX_HEIGHT_ABOVE_PODIUM).toDouble()
 
             return dragon.nearbyPlayers().filter {
-                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y <= podiumY + MAX_HEIGHT_ABOVE_PODIUM
+                !it.isCreative && !it.isSpectator && it.isAlive && it.onGround() && it.y in heightRange
             }
         }
 
-        private const val MAX_HEIGHT_ABOVE_PODIUM = 16
+        private const val MAX_HEIGHT_ABOVE_PODIUM = 8
+        private const val MAX_DEPTH_BELOW_PODIUM = 16
     }
 
     private enum class Stage {

@@ -313,9 +313,13 @@ class DragonRageAbility(
         fun hasRaged(dragon: EnderDragon): Boolean = RAGED_TAG in dragon.entityTags()
 
         @JvmStatic
+        fun healthCap(dragon: EnderDragon): Float =
+            if (hasRaged(dragon)) dragon.maxHealth * HEALTH_CAP_FRACTION else dragon.maxHealth
+
+        @JvmStatic
         fun capHealth(dragon: EnderDragon) {
-            val cap = dragon.maxHealth * HEALTH_CAP_FRACTION
-            if (hasRaged(dragon) && dragon.health > cap) dragon.health = cap
+            val cap = healthCap(dragon)
+            if (dragon.health > cap) dragon.health = cap
         }
     }
 }

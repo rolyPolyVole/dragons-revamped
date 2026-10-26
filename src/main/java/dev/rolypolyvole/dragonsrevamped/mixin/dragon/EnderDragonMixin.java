@@ -12,6 +12,7 @@ import dev.rolypolyvole.dragonsrevamped.dragon.abilities.DragonRageAbility;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAbilityManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.DragonAttackManager;
 import dev.rolypolyvole.dragonsrevamped.dragon.entities.CrystalProtector;
+import dev.rolypolyvole.dragonsrevamped.mixin.accessor.EnderDragonFightAccessor;
 import dev.rolypolyvole.dragonsrevamped.mixin.accessor.RangedAttributeAccessor;
 import dev.rolypolyvole.dragonsrevamped.util.DragonMovementKt;
 import dev.rolypolyvole.dragonsrevamped.util.ExplosionAnimation;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -70,6 +72,8 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
 
     @Shadow
     public int dragonDeathTime;
+    @Shadow
+    public EndCrystal nearestCrystal;
 
     @Unique
     private EnderDragonPart hitPart;
@@ -133,6 +137,7 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
         if (abilityManager != null) {
             DragonRageAbility.capHealth(self());
             DragonMovementKt.keepChunksTicking(self());
+            updateBossBarColor();
         }
 
         if (firstTick && abilityManager != null) {
@@ -265,15 +270,29 @@ public abstract class EnderDragonMixin extends Mob implements Enemy {
     @ModifyConstant(method = "checkCrystals()V", constant = @Constant(floatValue = 1.0F))
     private float customCrystalHeal(float original) {
         DragonConfig config = ModConfig.getCurrent();
-        int fighters = config.getFighters();
-        int ticksSinceLastHurt = tickCount - getLastHurtByMobTimestamp();
-        int hyperHealDelay = (int) (300 + 900 / Math.sqrt(fighters));
 
-        if (config.getHealing().getHyperHeal() && ticksSinceLastHurt > hyperHealDelay) {
+        if (isHyperHealing()) {
             return (float) (getMaxHealth() * 0.01F * config.getHealing().getHyperHealRate());
         }
 
-        return (float) ((1.0F + fighters * 0.1F) * config.getHealing().getCrystalHealRate());
+        return (float) ((1.0F + config.getFighters() * 0.1F) * config.getHealing().getCrystalHealRate());
+    }
+
+    @Unique
+    private boolean isHyperHealing() {
+        DragonConfig config = ModConfig.getCurrent();
+        int ticksSinceLastHurt = tickCount - getLastHurtByMobTimestamp();
+        int hyperHealDelay = (int) (300 + 900 / Math.sqrt(config.getFighters()));
+
+        return config.getHealing().getHyperHeal() && ticksSinceLastHurt > hyperHealDelay;
+    }
+
+    @Unique
+    private void updateBossBarColor() {
+        if (!(dragonFight instanceof EnderDragonFightAccessor fight)) return;
+
+        boolean healing = nearestCrystal != null && isHyperHealing() && getHealth() < DragonRageAbility.healthCap(self());
+        fight.dragonEvent().setColor(healing ? BossEvent.BossBarColor.PURPLE : BossEvent.BossBarColor.PINK);
     }
 
 

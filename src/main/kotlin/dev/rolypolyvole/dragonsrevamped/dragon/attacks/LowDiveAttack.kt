@@ -191,7 +191,7 @@ class LowDiveAttack(dragon: EnderDragon) : AbstractDragonAttack(dragon) {
         const val ARRIVAL_DISTANCE = 4.0
         const val MAX_DIVE_TICKS = 200
         const val LINGER_TICKS = 100
-        const val LINGER_SPEED = 0.65F
+        const val LINGER_SPEED = 0.5F
         const val MAX_VERTICAL_SPEED = 0.08
 
         const val PARTICLES_PER_TICK = 50

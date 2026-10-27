@@ -7,7 +7,7 @@
     "authors": [],
     "contact": {},
     "license": "All-Rights-Reserved",
-    "icon": "icon.jpeg",
+    "icon": "icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
